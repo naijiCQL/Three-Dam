@@ -2,13 +2,14 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-17 10:09:27
+ * @LastEditTime: 2023-11-20 16:18:47
  * @FilePath: \three-project\src\components\index.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
 import * as THREE from 'three';
 import { createWall, createDam, createTranDam, createWater, createWaterSurface, createLeftWall, createRightWall, createText } from './create3DObjects'
 import { getSYParams, getPressVal } from "@/api/home"
+import bus from '@/utils/bus'
 
 // 创建一个组将立方体放入其中
 const group = new THREE.Group();
@@ -78,9 +79,6 @@ export function initScene() {
         crossSensors.forEach((mesh) => {
             group.add(mesh)
         })
-
-        //获取各渗压计数值
-        receivePressVal('42011640018', '2023-09-01', '2023-11-14')
     })
         .catch(error => {
             console.error('Error:', error);
@@ -237,7 +235,7 @@ function createPressureSensors(params) {
  * @param {*} param3
  * @return {*}
  */
-function receivePressVal(params1, param2, param3) {
+export function receivePressVal(params1, param2, param3) {
     getPressVal(params1, param2, param3).then(res => {
         const press = res.data.press
         /* 将每个渗压计作为key，时间、数值作为值 */
@@ -303,9 +301,7 @@ async function updateTextLabels(dataPressArr) {
             const pressVal = values[upd][1];
 
             //将渗压计的数值进行更新
-            if (pressVal) (
-                textLabel.updateTextLabel(pressVal)
-           )
+            textLabel.updateTextLabel(pressVal)
 
             let height = pressVal / 100 - 0.25
 
@@ -360,5 +356,17 @@ async function updateTextLabels(dataPressArr) {
         await new Promise(resolve => setTimeout(resolve, 5000));
     }
 }
+
+//接收时间，并且发送请求获取渗水计的数值
+bus.$on('dateTime', value => {
+    //对选择的日期进行处理
+    const result = value.map(date => {
+        let d = new Date(date);
+        return d.toISOString().split('T')[0];
+    });
+
+    //获取各渗压计数值
+    receivePressVal('42011640018', result[0], result[1])
+})
 
 

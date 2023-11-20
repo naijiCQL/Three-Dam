@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-12 13:51:16
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-17 10:08:10
+ * @LastEditTime: 2023-11-17 15:06:41
  * @FilePath: \three-project\src\components\create3DObjects.js
  * @Description: 创建三维坝体与水面
  */
@@ -260,7 +260,13 @@ export function createText(group, x, y, z) {
 
         loader.load('/SimHei_Regular.json', function (font) {
 
-            const updatedText = `渗压计高度:${newH.toFixed(3)}m`;
+            let updatedText = null;
+
+            if (newH) {
+                updatedText = `渗压计高度:${newH.toFixed(3)}m`;
+            } else {
+                updatedText = `渗压计高度:${newH}m`;
+            }
 
             const textGeometry = new TextGeometry(updatedText, {
                 font: font,
