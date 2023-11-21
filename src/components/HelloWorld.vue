@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 15:48:43
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-20 16:51:54
+ * @LastEditTime: 2023-11-21 15:06:32
  * @FilePath: \three-project\src\components\HelloWorld.vue
  * @Description: 
 -->
@@ -13,7 +13,7 @@
     <div class="control">
       <div class="block">
         <span class="demonstration">日期：</span>
-        <el-date-picker v-model="value1" type="daterange" range-separator="至" start-placeholder="开始日期"
+        <el-date-picker v-model="formInline.value1" type="daterange" range-separator="至" start-placeholder="开始日期"
           end-placeholder="结束日期" size="small">
         </el-date-picker>
       </div>
@@ -32,7 +32,9 @@ import bus from '@/utils/bus'
 export default {
   data() {
     return {
-      value1: '',
+      formInline: {
+        value1: this.getDateTime() //methods优先级高于data  (props==>methods==>data==>computed==>watch)
+      }
     };
   },
   mounted() {
@@ -49,7 +51,13 @@ export default {
     },
     //通过日期进行查询
     select() {
-      bus.$emit('dateTime', this.value1);
+      bus.$emit('dateTime', this.formInline.value1);
+    },
+    //添加默认显示时间
+    getDateTime() {
+      let startDate = new Date("2023-08-16");
+      let endDate = new Date("2023-11-14");
+      return [startDate.getTime(), endDate.getTime()];
     }
   }
 }
@@ -69,8 +77,8 @@ export default {
 .control {
   position: absolute;
   display: flex;
-  top: 3%;
-  right: 3%;
+  top: 2%;
+  right: 1%;
   background-color: white;
   padding: 10px;
   border-radius: 8px;
@@ -78,7 +86,7 @@ export default {
 
 .demonstration {
   margin-left: 5px;
-  font-size: 15px;              
+  font-size: 15px;
 }
 
 .select-button {

@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-20 16:18:47
+ * @LastEditTime: 2023-11-21 14:38:47
  * @FilePath: \three-project\src\components\index.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
@@ -25,6 +25,8 @@ const shortSensors = []
 const lineSensors = []
 //保存断面线
 const crossSensors = []
+//记录渗压计管的数量
+let totalCount = 0
 
 /**
  * @description: 初始化三维场景
@@ -111,6 +113,8 @@ export function initScene() {
 function createPressureSensors(params) {
     return getSYParams(params).then(res => {
         const data = res.resultList
+        //将渗压计管数量记录
+        totalCount = res.totalCount
 
         // 按照 ch 字段分组渗压计数据
         const groupedByCh = data.reduce((acc, sensor) => {
@@ -275,6 +279,13 @@ export function receivePressVal(params1, param2, param3) {
                 dataPressArr[dt][key] = [textLabelArr, press_val, shortEntityArr];
             });
         }
+        //将缺乏的日期进行删除
+        for (let date in dataPressArr) {
+            let keys = Object.keys(dataPressArr[date]);
+            if (keys.length !== totalCount) {
+                delete dataPressArr[date];
+            }
+        }
         console.log(dataPressArr)
         // 调用异步函数
         updateTextLabels(dataPressArr);
@@ -303,7 +314,7 @@ async function updateTextLabels(dataPressArr) {
             //将渗压计的数值进行更新
             textLabel.updateTextLabel(pressVal)
 
-            let height = pressVal / 100 - 0.25
+            let height = (pressVal / 100) - 0.25
 
             /* 获取初始mesh的各参数 */
             const shortEntityHeight = values[upd][2].geometry.parameters.height;
@@ -352,7 +363,7 @@ async function updateTextLabels(dataPressArr) {
                 group.add(mesh)
             })
         }
-        // 使用 setTimeout 延迟5秒钟
+        // 使用setTimeout延迟5秒钟
         await new Promise(resolve => setTimeout(resolve, 5000));
     }
 }
@@ -364,7 +375,6 @@ bus.$on('dateTime', value => {
         let d = new Date(date);
         return d.toISOString().split('T')[0];
     });
-
     //获取各渗压计数值
     receivePressVal('42011640018', result[0], result[1])
 })
