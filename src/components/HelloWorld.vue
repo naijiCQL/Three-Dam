@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 15:48:43
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-21 15:06:32
+ * @LastEditTime: 2023-11-24 17:33:45
  * @FilePath: \three-project\src\components\HelloWorld.vue
  * @Description: 
 -->
@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import { initScene } from "./index";
+import { initScene } from "./initScene";
 // 导入轨道控制器
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import bus from '@/utils/bus'
