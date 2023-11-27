@@ -2,12 +2,13 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-24 14:39:36
+ * @LastEditTime: 2023-11-27 17:18:28
  * @FilePath: \three-project\src\components\initScene.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
 import * as THREE from 'three';
-import { riverBed, frontDam, middleDam,behindDam,tranDam ,drawLadder} from './createYsyRes'
+import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder, createWater, createWaterSurface, crossLine, createRail, loadGLTFModel } from './createYsyRes'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 // 创建一个组将立方体放入其中
 const group = new THREE.Group();
@@ -44,6 +45,44 @@ export function initScene() {
     group.add(behindDam())
     group.add(tranDam())
     group.add(drawLadder())
+    group.add(createWater())
+    group.add(createWaterSurface())
+    group.add(crossLine())
+    group.add(createRail())
+
+
+    const treePositions = [
+        new THREE.Vector3(30, 20, 45),
+        new THREE.Vector3(55, 16, 55),
+        new THREE.Vector3(55, 16, 42),
+        new THREE.Vector3(40, 18, 50),
+        new THREE.Vector3(40, 18, 30),
+        new THREE.Vector3(30, 20, 15),
+    ];
+
+    // 逐个加载树木并添加到场景中
+    treePositions.forEach(position => {
+        loadGLTFModel('/tree.gltf', position)
+            .then((scene) => {
+                group.add(scene); // 将加载的scene添加到您的场景中
+            })
+            .catch((error) => {
+                console.error('Error loading GLTF model:', error); // 加载失败的处理
+            });
+    });
+
+    const loader = new GLTFLoader()
+    //添加glb模型
+    loader.load('/skara_brae_orkney._house_2_1k.glb', (gltf) => {
+
+        gltf.scene.position.set(50, 25, 25)
+        gltf.scene.scale.set(3, 3, 3)
+
+        scene.add(gltf.scene)
+    }, (error) => {
+        console.error(error)
+    })
+
 
     // 将组添加到场景中
     scene.add(group);

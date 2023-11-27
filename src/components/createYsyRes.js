@@ -2,11 +2,13 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-12 13:51:16
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-24 16:41:14
+ * @LastEditTime: 2023-11-27 17:40:50
  * @FilePath: \three-project\src\components\createYsyRes.js
  * @Description: 创建杨树堰水库三维模型
  */
 import * as THREE from 'three';
+import { Water } from 'three/examples/jsm/objects/Water2.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 //定义几何体参数设置
 const extrudeSettings = {
@@ -21,32 +23,13 @@ const extrudeSettings = {
 //初始纹理加载器
 const textureLoader = new THREE.TextureLoader();
 
-/* 添加大坝坝体的纹理 */
-const damTexture = textureLoader.load('/wood.jpg')
-// 根据需要调整重复的次数。水平重复1次，垂直重复0.25次
-damTexture.repeat.set(1, 1);
-damTexture.wrapS = THREE.RepeatWrapping // 水平重复
-damTexture.wrapT = THREE.MirroredRepeatWrapping // 垂直镜像重复
-
-//大坝实体材质
-const damMaterial = new THREE.MeshBasicMaterial({
-    map: damTexture,
-});
-
-//大坝透明材质
-const damTranMaterial = new THREE.MeshBasicMaterial({
-    map: damTexture,
-    transparent: true, // 开启透明
-    opacity: 0.3, // 设置透明度
-    depthWrite: false
-});
-
 /**
  * @description: 创建河床
  * @return {*}
  */
 export function riverBed() {
     const shape = new THREE.Shape();
+
     shape.moveTo(-63.02, 0);
     shape.lineTo(-63.02, 15);
     shape.lineTo(-7, 11);
@@ -59,7 +42,12 @@ export function riverBed() {
 
     const extrudeGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-    const riverBed = new THREE.Mesh(extrudeGeometry, damMaterial);
+    //大坝实体材质
+    const material = new THREE.MeshBasicMaterial({
+        map: loadTexture('/gravel.png'),
+    });
+
+    const riverBed = new THREE.Mesh(extrudeGeometry, material);
 
     return riverBed;
 }
@@ -83,7 +71,11 @@ export function frontDam() {
 
     const extrudeGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-    const frontDam = new THREE.Mesh(extrudeGeometry, damMaterial);
+    const material = new THREE.MeshBasicMaterial({
+        map: loadTexture('/floor.jpg'),
+    });
+
+    const frontDam = new THREE.Mesh(extrudeGeometry, material);
 
     return frontDam;
 }
@@ -105,15 +97,11 @@ export function middleDam() {
 
     const extrudeGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-    const damMaterial = new THREE.MeshBasicMaterial({ color: 'black' });
+    const material = new THREE.MeshBasicMaterial({
+        map: loadTexture('/dam.png'),
+    });
 
-    const middleDam = new THREE.Mesh(extrudeGeometry, damMaterial);
-
-    // // 旋转角度转换为弧度
-    // const angleInRadians = THREE.MathUtils.degToRad(270); // 如果是角度制的旋转
-    // // 将对象 `middleDam` 绕 y 轴旋转 90 度
-    // middleDam.rotation.x = angleInRadians;
-    // middleDam.position.z = 50
+    const middleDam = new THREE.Mesh(extrudeGeometry, material);
 
     return middleDam;
 }
@@ -128,17 +116,44 @@ export function behindDam() {
     shape.moveTo(2, 35);
     shape.lineTo(23, 21);
     shape.lineTo(62, 15);
-    shape.lineTo(62, 0);
+    shape.lineTo(62, 10);
     shape.lineTo(7, 11);
     shape.moveTo(2, 35);
 
     const extrudeGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-    const behindDam = new THREE.Mesh(extrudeGeometry, damMaterial);
+    const material = new THREE.MeshBasicMaterial({
+        map: loadTexture('/floor.jpg'),
+    });
+
+    const behindDam = new THREE.Mesh(extrudeGeometry, material);
 
     return behindDam;
 }
 
+/**
+ * @description: 创建围栏
+ * @return {*}
+ */
+export function createRail() {
+    const shape = new THREE.Shape();
+
+    shape.moveTo(-2, 35);
+    shape.lineTo(-2, 36);
+    shape.lineTo(-1.5, 36);
+    shape.lineTo(-1.5, 35);
+    shape.moveTo(-2, 35);
+
+    const extrudeGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+
+    const material = new THREE.MeshBasicMaterial({
+        map: loadTexture('/wall.jpg'),
+    });
+
+    const leftRail = new THREE.Mesh(extrudeGeometry, material);
+
+    return leftRail;
+}
 /**
  * @description: 建造透明色大坝
  * @return {*}
@@ -156,15 +171,96 @@ export function tranDam() {
 
     const extrudeGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-    const behindDam = new THREE.Mesh(extrudeGeometry, damTranMaterial);
+    //大坝透明材质
+    const tranMaterial = new THREE.MeshBasicMaterial({
+        map: loadTexture('/floor.jpg'),
+        transparent: true, // 开启透明
+        opacity: 0.7, // 设置透明度
+        depthWrite: false
+    });
+
+    const behindDam = new THREE.Mesh(extrudeGeometry, tranMaterial);
 
     return behindDam;
 }
 
+/**
+ * @description: 创建水体
+ * @return {*}
+ */
+export function createWater() {
+    const geometry = new THREE.CylinderGeometry(31, 31, 25, 5);
+    const material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(74,198,237)"), transparent: true, opacity: 0.65 });
+    const resWater = new THREE.Mesh(geometry, material);
+
+    resWater.position.y = 21
+    resWater.position.z = 30
+    resWater.position.x = -30
+    resWater.rotation.y = THREE.MathUtils.degToRad(55);
+
+    return resWater;
+}
+
+/**
+ * @description: 创建水体动态水面
+ * @return {*}
+ */
+export function createWaterSurface() {
+    const geometry = new THREE.CylinderGeometry(31, 31, 0.1, 5);
+    //创建动态水面材质
+    const runWaterSurface = new Water(
+        geometry,
+        {
+            flowSpeed: 0.25,//定义流速
+            color: new THREE.Color("rgb(74,198,237)"),
+            normalMap0: new THREE.TextureLoader().load('/waternormals.jpg', function (texture) {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            }),
+            normalMap1: new THREE.TextureLoader().load('/waternormals.jpg', function (texture) {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            }),
+        }
+    );
+
+    runWaterSurface.position.y = 33.6
+    runWaterSurface.position.z = 30
+    runWaterSurface.position.x = -30
+    runWaterSurface.rotation.y = THREE.MathUtils.degToRad(55);
+
+    return runWaterSurface;
+}
+
+/**
+ * @description: 创建横截面线
+ * @return {*}
+ */
+export function crossLine() {
+    const path = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-39, 33.2, 1),
+        new THREE.Vector3(-39, 32, 10),
+        new THREE.Vector3(-39, 26, 20),
+        new THREE.Vector3(-39, 23, 25),
+        new THREE.Vector3(-39, 22, 30),
+        new THREE.Vector3(-39, 23, 35),
+        new THREE.Vector3(-39, 26, 40),
+        new THREE.Vector3(-39, 32, 50),
+        new THREE.Vector3(-39, 33.2, 59),
+    ]);
+    //定义材质与生成断面线
+    const crossGeometry = new THREE.TubeGeometry(path, 64, 0.2, 8, false); // 修改这里的 0.02 可以改变线的宽度
+    const crossMaterial = new THREE.MeshBasicMaterial({ color: 'black' }); // 和水深一个颜色
+    const crossLine = new THREE.Mesh(crossGeometry, crossMaterial);
+
+    return crossLine
+}
+
+/**
+ * @description: 绘制后坝体的阶梯状效果
+ * @return {*}
+ */
 export function drawLadder() {
     const geometry = new THREE.BufferGeometry();
-    // 创建一个简单的矩形. 在这里我们左上和右下顶点被复制了两次。
-    // 因为在两个三角面片里，这两个顶点都需要被用到。
+
     const vertices = new Float32Array([
         23, 21, 10,
         2, 35, 10,
@@ -202,13 +298,63 @@ export function drawLadder() {
     // itemSize = 3 因为每个顶点都是一个三元组。
     geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 
-    const material = new THREE.MeshBasicMaterial({ color: 0x7B7E66, side: THREE.DoubleSide });
+    // const grassMaterial = new THREE.MeshBasicMaterial({
+    //     map: loadTexture('/gravel.png'),
+    //     side: THREE.DoubleSide
+    // });
 
-    const lines = new THREE.Mesh(geometry, material);
+    const grassMaterial = new THREE.MeshBasicMaterial({ color: 0x7B7E66, side: THREE.DoubleSide });
+
+    const lines = new THREE.Mesh(geometry, grassMaterial);
 
     lines.position.x = 0
     lines.position.y = 0.3
     lines.position.z = 10
 
     return lines;
+}
+
+/**
+ * @description: 添加图片作为纹理
+ * @param {*} path
+ * @return {*}
+ */
+function loadTexture(path) {
+    const texture = textureLoader.load(path)
+    // 根据需要调整重复的次数。
+    texture.repeat.set(0.1, 0.1);
+    texture.wrapS = THREE.RepeatWrapping // 水平重复
+    texture.wrapT = THREE.MirroredRepeatWrapping // 垂直镜像重复
+
+    return texture
+}
+
+/**
+ * @description: 添加3Dgltf模型
+ * @param {*} modelPath
+ * @param {*} position
+ * @return {*}
+ */
+export function loadGLTFModel(modelPath, position) {
+    return new Promise((resolve, reject) => {
+        const loader = new GLTFLoader();
+        loader.load(modelPath, function (gltf) {
+            gltf.scene.scale.set(1, 1, 1);
+
+            gltf.scene.position.copy(position); // 设置树木的位置
+
+            gltf.scene.traverse(function (child) {
+                if (child.isMesh) {
+                    child.frustumCulled = false;
+                    child.castShadow = true;
+                    child.material.emissive = child.material.color;
+                    child.material.emissiveMap = child.material.map;
+                }
+            });
+
+            resolve(gltf.scene); // 成功加载，将gltf.scene作为Promise的结果返回
+        }, undefined, function (error) {
+            reject(error); // 加载失败，将错误信息作为Promise的reject返回
+        });
+    });
 }

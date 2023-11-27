@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-12 13:51:16
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-17 15:06:41
+ * @LastEditTime: 2023-11-27 10:52:24
  * @FilePath: \three-project\src\components\create3DObjects.js
  * @Description: 创建三维坝体与水面
  */
@@ -120,7 +120,10 @@ export function createTranDam() {
     return sideWall;
 }
 
-//创建水体
+/**
+ * @description: 创建水体
+ * @return {*}
+ */
 export function createWater() {
     const shape = new THREE.Shape();
     shape.moveTo(-4, 0.25);
