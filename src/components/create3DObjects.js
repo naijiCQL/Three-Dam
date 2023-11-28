@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-12 13:51:16
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-27 10:52:24
+ * @LastEditTime: 2023-11-28 17:29:32
  * @FilePath: \three-project\src\components\create3DObjects.js
  * @Description: 创建三维坝体与水面
  */
@@ -273,7 +273,7 @@ export function createText(group, x, y, z) {
 
             const textGeometry = new TextGeometry(updatedText, {
                 font: font,
-                size: 0.03,
+                size: 0.3,
                 height: 0,
                 curveSegments: 12,
                 bevelEnabled: false,
