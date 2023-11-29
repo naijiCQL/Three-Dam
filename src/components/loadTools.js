@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-28 11:04:04
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-29 11:38:10
+ * @LastEditTime: 2023-11-29 17:02:00
  * @FilePath: \three-project\src\components\loadTools.js
  * @Description: 加载three.js模型的方法
  */
@@ -82,7 +82,6 @@ export function loadAndAddTreeModels(modelPath, positions, scale, group) {
             });
     });
 }
-
 /**
  * @description: 创建文字标注并且可修改文字标注内容
  * @param {*} group

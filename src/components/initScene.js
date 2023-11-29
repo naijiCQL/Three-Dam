@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-29 11:28:45
+ * @LastEditTime: 2023-11-29 17:25:48
  * @FilePath: \three-project\src\components\initScene.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
@@ -14,10 +14,13 @@ import { loadAndAddTreeModels } from './loadTools'
 import { createPressureSensors } from './createSyj'
 import { getTreePosition1, getTreePosition2, getTreePosition3 } from './positionData'
 import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder, createWater, createWaterSurface, crossLine, createRail, createCorridors } from './createYsyRes'
+import { jpRiverBed, jpFrontDam, jpMiddleDam, jpBehindDam, jpDrawLadder, jpCreateRail, jpCreateCorridors } from './createJpRes'
 
 const scene = new THREE.Scene();// 创建场景
 const group = new THREE.Group();// 创建一个组将3D物体放入其中
 const shortSensors = [];//保存短的圆柱体
+const axesHelper = new THREE.AxesHelper(400)//添加坐标轴辅助器。参数：坐标轴长，红色代表 X 轴. 绿色代表 Y 轴. 蓝色代表 Z 轴.
+const camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 0.1, 5000); //创建相机
 
 /**
  * @description: 初始化三维场景
@@ -30,23 +33,16 @@ export function initScene() {
     var texture = textureLoader.load('/bg.jpg');
     // 纹理对象Texture赋值给场景对象的背景属性.background
     scene.background = texture
-
-    //添加坐标轴辅助器。参数：坐标轴长，红色代表 X 轴. 绿色代表 Y 轴. 蓝色代表 Z 轴.
-    const axesHelper = new THREE.AxesHelper(500)
+    // 设置相机视角参数
+    camera.position.x = 300;
+    camera.position.y = 300;
+    camera.position.z = 300;
     //将坐标辅助器添加进场景中
     scene.add(axesHelper)
-
-    //创建相机
-    const camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 0.1, 5000);
-    camera.position.x = 80;
-    camera.position.y = 100;
-    camera.position.z = 200;
-
     // 创建渲染器
     const renderer = new THREE.WebGLRenderer();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-
     // 渲染函数
     function animate() {
         renderer.render(scene, camera);
@@ -191,28 +187,73 @@ async function updateTextLabels(dataPressArr) {
         await new Promise(resolve => setTimeout(resolve, 5000));
     }
 }
+
+/**
+ * @description: 清空场景内创建的物体
+ * @return {*}
+ */
+function remove3DObject() {
+    // 释放 几何体 和 材质
+    const clearCache = (item) => {
+        item.geometry.dispose();
+        item.material.dispose();
+    };
+
+    // 递归释放物体下的 几何体 和 材质
+    const removeObj = (obj) => {
+        let arr = obj.children.filter((x) => x);
+        arr.forEach((item) => {
+            if (item.children.length) {
+                removeObj(item);
+            } else {
+                clearCache(item);
+                item.clear();
+            }
+        });
+        obj.clear();
+        arr = null;
+    };
+    // 移除 group
+    removeObj(group);
+    //将坐标辅助器添加进场景中
+    scene.add(axesHelper)
+}
 /**
  * @description: 接受水库编码，用于显示水库
  * @return {*}
  */
 bus.$on('resCode', value => {
+    //从场景移除已经创建的物体
+    remove3DObject()
+    //根据所选择的水库进行展示模型
     if (value === '42128140006') {
-        console.log('金盆水库')
-        // 从场景中移除所有对象
-        scene.remove.apply(scene, scene.children);
+        //设置相机视角
+        camera.position.x = -300;
+        camera.position.y = 800;
+        camera.position.z = 800;
 
-        // 遍历场景中的所有对象，并清理内存
-        scene.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-                child.geometry.dispose();
-                child.material.dispose();
-            }
-        });
+        group.add(jpRiverBed())
+        group.add(jpFrontDam())
+        group.add(jpMiddleDam(60, '/dam.png', 0, 0))
+        group.add(jpMiddleDam(100, '/dam.png', 0, 270))
+        group.add(jpMiddleDam(90, '/floor.jpg', 60, 0))
+        group.add(jpBehindDam(60, true, 0, 0, 0))
+        group.add(jpBehindDam(90, false, 60, 0, 0))
+        group.add(jpBehindDam(100, true, 0, 90, -100))
+        group.add(jpCreateRail(150, 0, 0))
+        group.add(jpCreateRail(100, 270, 3.7))
+        group.add(jpCreateCorridors(150, 0))
+        group.add(jpCreateCorridors(100, 270))
+        group.add(jpDrawLadder())
 
-        // 将场景的 children 设为空数组，清空场景
-        scene.children = [];
+        // 将组添加到场景中
+        scene.add(group);
     } else {
-        console.log('杨树堰水库')
+        //设置相机视角
+        camera.position.x = 80;
+        camera.position.y = 100;
+        camera.position.z = 200;
+
         //将绘制的物体添加进场景中
         group.add(riverBed())
         group.add(frontDam())

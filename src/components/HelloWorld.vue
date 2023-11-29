@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 15:48:43
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-29 10:24:03
+ * @LastEditTime: 2023-11-29 14:08:55
  * @FilePath: \three-project\src\components\HelloWorld.vue
  * @Description: 
 -->
@@ -67,12 +67,13 @@ export default {
     },
     //通过日期进行查询
     select() {
+      console.log(this.formInline.value1)
       bus.$emit('dateTime', this.formInline.value1);
     },
     //添加默认显示时间
     getDateTime() {
       let startDate = new Date("2023-08-16");
-      let endDate = new Date("2023-11-14");
+      let endDate = new Date();
       return [startDate.getTime(), endDate.getTime()];
     },
     //选择水库，并将水库编码进行传输

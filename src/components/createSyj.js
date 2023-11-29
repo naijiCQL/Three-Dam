@@ -4,7 +4,7 @@
  * @LastEditors: 陈巧龙
  * @LastEditTime: 2023-11-29 11:27:11
  * @FilePath: \three-project\src\components\createSyj.js
- * @Description: 为两个水库创建渗水计
+ * @Description: 为两个水库创建渗压计
  */
 import * as THREE from 'three';
 import store from '@/store/index'
