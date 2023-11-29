@@ -2,106 +2,155 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-28 13:53:40
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-28 17:28:58
+ * @LastEditTime: 2023-11-29 11:27:11
  * @FilePath: \three-project\src\components\createSyj.js
- * @Description: 为各个水库创建渗水计以及显示渗水计数值
+ * @Description: 为两个水库创建渗水计
  */
 import * as THREE from 'three';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import store from '@/store/index'
+import { getSYParams } from "@/api/home"
+import { createText } from './loadTools'
 
-//定义数组来保存各文字标签的mesh
-const textMeshArray = []
+//保存显示的文字对象
+const textLabelArray = {}
+//保存显示内部实体对象
+const shortEntityArray = {}
+//保存长的圆柱体
+const longSensors = [];
+//保存短的圆柱体
+const shortSensors = []
+//保存射线
+const lineSensors = []
+//保存断面线
+const crossSensors = []
 
 /**
- * @description: 创建文字标注并且可修改文字标注内容
+ * @description: 创建杨树堰水库的渗压计三维体
+ * @param {*} params
  * @param {*} group
- * @param {*} x
- * @param {*} y
- * @param {*} z
  * @return {*}
  */
-export function createText(group, x, y, z) {
-    let textMesh = null;
+export function createPressureSensors(params, group) {
+    return getSYParams(params).then(res => {
+        const data = res.resultList
+        //将渗压计管数量进行保存
+        store.commit('updataTotalCount', res.totalCount)
 
-    const loader = new FontLoader();
-
-    loader.load('/SimHei_Regular.json', function (font) {
-
-        const textGeometry = new TextGeometry(``, {
-            font: font,
-            size: 0.1,
-            height: 0,
-            curveSegments: 12,
-            bevelEnabled: false,
-            bevelThickness: 0,
-            bevelSize: 0,
-        });
-
-        // 创建文字材质
-        const textMaterial = new THREE.MeshBasicMaterial({ color: 'black' });
-        // 创建文字网格
-        textMesh = new THREE.Mesh(textGeometry, textMaterial);
-
-        // 设置文字的位置
-        textMesh.position.set(x, y, z);
-        // 将文本网格绕 Y 轴旋转 90 度
-        textMesh.rotateY(Math.PI / 2);
-
-        group.add(textMesh)
-    });
-
-    // 实时更新标签内容和位置
-    function updateTextLabel(newH) {
-
-        loader.load('/SimHei_Regular.json', function (font) {
-
-            let updatedText = null;
-
-            if (newH) {
-                updatedText = `渗压计高度:${newH.toFixed(3)}m`;
-            } else {
-                updatedText = `渗压计高度:${newH}m`;
+        // 按照 ch 字段分组渗压计数据
+        const groupedByCh = data.reduce((acc, sensor) => {
+            const { mpcd, dvcd, ch } = sensor;
+            if (!acc[ch]) {
+                acc[ch] = [];
             }
+            acc[ch].push({ mpcd, dvcd, ch }); // 只保留 mpcd、dvcd、ch 字段
+            return acc;
+        }, {});
 
-            const textGeometry = new TextGeometry(updatedText, {
-                font: font,
-                size: 0.3,
-                height: 0,
-                curveSegments: 12,
-                bevelEnabled: false,
-                bevelThickness: 0,
-                bevelSize: 0,
-            });
+        //根据横断面的数量确定各横断面的间距
+        const length = Math.floor(35 / Object.keys(groupedByCh).length - 1);
 
-            // 创建文字材质
-            const textMaterial = new THREE.MeshBasicMaterial({ color: 'black' });
-            // 创建文字网格
-            textMesh = new THREE.Mesh(textGeometry, textMaterial);
-            //将mesh进行保存
-            textMeshArray.push(textMesh)
-            // 设置文字的位置
-            textMesh.position.set(x, y, z);
-            // 将文本网格绕 Y 轴旋转 90 度
-            textMesh.rotateY(Math.PI / 2);
+        // 创建渗压计，定义基本参数
+        let x = 8
+        let yLong = 11
+        let yShort = 11.5
+        let labelY = 11.5
+        let z = 22
 
-            //为了避免切换时会出现闪烁，先加载再进行删除
-            if (textMeshArray.length > 0) {
-                group.add(textMeshArray[textMeshArray.length - 1])
+        for (const ch in groupedByCh) {
+            const sensorsInSection = groupedByCh[ch];
 
-                // 当数组长度达到第7组时，删除前六组
-                if (textMeshArray.length === 7) {
-                    const newTextMeshArray = textMeshArray.slice(0, 6);
-                    textMeshArray.splice(0, 6);
-                    newTextMeshArray.forEach((mesh) => {
-                        group.remove(mesh)
-                    })
+            // 根据 mpcd 对渗压计进行排序
+            sensorsInSection.sort((a, b) => a.mpcd - b.mpcd);
+
+            /* 创建断面线 */
+            //创建断面线路径
+            const path = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(2, 35, z),
+                new THREE.Vector3(8, 19, z),
+                new THREE.Vector3(14, 18.5, z),
+                new THREE.Vector3(20, 18, z),
+                new THREE.Vector3(23, 10, z),
+                new THREE.Vector3(20, 18, z),
+                new THREE.Vector3(14, 18.5, z),
+                new THREE.Vector3(8, 19, z),
+                new THREE.Vector3(2, 35, z),
+            ]);
+            //定义材质与生成断面线
+            const crossGeometry = new THREE.TubeGeometry(path, 64, 0.02, 8, true); // 修改这里的 0.02 可以改变线的宽度
+            const crossMaterial = new THREE.MeshBasicMaterial({ color: 0x27B7EE }); // 和水深一个颜色
+            const crossCylinder = new THREE.Mesh(crossGeometry, crossMaterial);
+            //将创建的断面线进行保存
+            crossSensors.push(crossCylinder)
+
+            sensorsInSection.forEach((sensor) => {
+                /* 创建外部空心圆柱体 */
+                const longGeometry = new THREE.CylinderGeometry(0.15, 0.15, 20, 32);
+                const longMaterial = new THREE.MeshBasicMaterial({ color: 0xEBF3FB, transparent: true, opacity: 0.4, depthWrite: false });
+                const longCylinder = new THREE.Mesh(longGeometry, longMaterial);
+                //改变空心圆柱体的位置
+                longCylinder.position.x = x;
+                longCylinder.position.y = yLong;
+                longCylinder.position.z = z;
+
+                /* 创建内部实体圆柱体 */
+                const shortGeometry = new THREE.CylinderGeometry(0.08, 0.08, 0.5, 32);
+                // 创建材质
+                const shortMaterial = new THREE.MeshBasicMaterial({ color: 0x27B7EE });
+                // 创建圆柱体网格
+                const shortCylinder = new THREE.Mesh(shortGeometry, shortMaterial);
+                //改变实心圆柱体的位置
+                shortCylinder.position.x = x;
+                shortCylinder.position.y = yShort;
+                shortCylinder.position.z = z;
+
+                //将测站编码与相应的实体圆柱进行绑定
+                const dvcd = sensor.dvcd;
+                if (!shortEntityArray[dvcd]) {
+                    shortEntityArray[dvcd] = []; // 如果尚未存在，则创建一个数组
                 }
-            } else {
-                group.add(textMeshArray[0])
-            }
-        });
-    }
+                // 将实体圆柱体保存到对应的dvcd的数组中
+                shortEntityArray[dvcd].push(shortCylinder);
 
-    return { updateTextLabel };
+                /* 创建内部绿色射线 */
+                const path = new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(x, yShort, z),
+                    new THREE.Vector3(x, yShort + 9, z)
+                ]);
+
+                const lineGeometry = new THREE.TubeGeometry(path, 64, 0.02, 8, true); // 修改这里的 0.02 可以改变线的宽度
+                const lineMaterial = new THREE.MeshBasicMaterial({ color: 0x00FF00 }); // 绿色
+                const lineCylinder = new THREE.Mesh(lineGeometry, lineMaterial);
+
+                /* 创建文字标识 */
+                const textLabel = createText(group, x, labelY, z)
+
+                //将测站编码与相应的标签样式进行绑定
+                if (!textLabelArray[dvcd]) {
+                    textLabelArray[dvcd] = [];
+                }
+                // 将 textLabel 保存到对应的 dvcd 的数组中
+                textLabelArray[dvcd].push(textLabel);
+
+                longSensors.push(longCylinder);
+                shortSensors.push(shortCylinder);
+                lineSensors.push(lineCylinder)
+
+                x += 6
+            });
+            x = 8
+            yLong = 11
+            yShort = 11.5
+            labelY = 11.5
+            z += length
+        }
+        //将显示的文字对象进行保存
+        store.commit('updateTextLabelArray', textLabelArray)
+        //将显示内部实体对象进行保存
+        store.commit('updateShortEntityArray', shortEntityArray)
+
+        return { longSensors, shortSensors, lineSensors, crossSensors };
+    })
+        .catch(error => {
+            console.log(error);
+        });
 }

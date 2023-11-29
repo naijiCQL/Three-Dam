@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 15:48:43
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-28 11:30:08
+ * @LastEditTime: 2023-11-29 10:24:03
  * @FilePath: \three-project\src\components\HelloWorld.vue
  * @Description: 
 -->
@@ -11,7 +11,14 @@
     <div id="container" ref="webgl">
     </div>
     <div class="control">
-      <div class="block">
+      <div style="margin: 5px;">
+        <span class="demonstration">水库：</span>
+        <el-select v-model="value" placeholder="请选择" size="small" @change="selectRes">
+          <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+          </el-option>
+        </el-select>
+      </div>
+      <div style="margin: 5px;">
         <span class="demonstration">日期：</span>
         <el-date-picker v-model="formInline.value1" type="daterange" range-separator="至" start-placeholder="开始日期"
           end-placeholder="结束日期" size="small">
@@ -34,7 +41,16 @@ export default {
     return {
       formInline: {
         value1: this.getDateTime() //methods优先级高于data  (props==>methods==>data==>computed==>watch)
-      }
+      },
+      options: [{
+        value: '42128140006',
+        label: '金盆水库'
+      },
+      {
+        value: '42011640018',
+        label: '杨树堰水库'
+      }],
+      value: ''
     };
   },
   mounted() {
@@ -58,6 +74,11 @@ export default {
       let startDate = new Date("2023-08-16");
       let endDate = new Date("2023-11-14");
       return [startDate.getTime(), endDate.getTime()];
+    },
+    //选择水库，并将水库编码进行传输
+    selectRes() {
+      this.$store.commit('updateResCode', this.value)
+      bus.$emit('resCode', this.value);
     }
   }
 }
@@ -82,14 +103,19 @@ export default {
   background-color: white;
   padding: 10px;
   border-radius: 8px;
+  flex-direction: column;
 }
 
 .demonstration {
-  margin-left: 5px;
+  margin: 5px;
   font-size: 15px;
+
 }
 
 .select-button {
-  margin-left: 7px;
+  margin: 5px;
+  display: flex;
+  justify-content: center;
+  /* 在水平方向上居中对齐 */
 }
 </style>

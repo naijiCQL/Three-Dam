@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-12 13:51:16
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-28 17:42:05
+ * @LastEditTime: 2023-11-29 09:25:50
  * @FilePath: \three-project\src\components\createYsyRes.js
  * @Description: 创建杨树堰水库三维基础模型
  */
@@ -184,8 +184,8 @@ export function tranDam() {
     const shape = new THREE.Shape();
 
     shape.moveTo(-63.02, 20);
-    shape.lineTo(-63.02, 33);
-    shape.lineTo(-2, 33);
+    shape.lineTo(-63.02, 33.5);
+    shape.lineTo(-2, 33.5);
     shape.lineTo(-20, 27.5);
     shape.lineTo(-22, 27.5);
     shape.lineTo(-42, 20);
@@ -315,7 +315,7 @@ export function drawLadder() {
         vertexColors: THREE.VertexColors, //使用缓存中的颜色
         side: THREE.DoubleSide,
         transparent: true, // 开启透明
-        opacity: 0.8, // 设置透明度
+        opacity: 0.7, // 设置透明度
         depthWrite: false,
     });
 

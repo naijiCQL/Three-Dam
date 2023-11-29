@@ -2,42 +2,28 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-28 17:37:22
+ * @LastEditTime: 2023-11-29 11:28:45
  * @FilePath: \three-project\src\components\initScene.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
-import * as THREE from 'three';
-import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder, createWater, createWaterSurface, crossLine, createRail, createCorridors } from './createYsyRes'
-import { loadGLTFModel } from './loadTools'
-import { getTreePosition1, getTreePosition2, getTreePosition3 } from './positionData'
-import { createText } from './createSyj'
 import bus from '@/utils/bus'
-import { getSYParams, getPressVal } from "@/api/home"
+import * as THREE from 'three';
+import store from '@/store/index'
+import { getPressVal } from "@/api/home"
+import { loadAndAddTreeModels } from './loadTools'
+import { createPressureSensors } from './createSyj'
+import { getTreePosition1, getTreePosition2, getTreePosition3 } from './positionData'
+import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder, createWater, createWaterSurface, crossLine, createRail, createCorridors } from './createYsyRes'
 
-// 创建一个组将立方体放入其中
-const group = new THREE.Group();
-//定义保存显示的文字对象
-const textLabelArray = {}
-//定义保存显示内部实体对象
-const shortEntityArray = {}
-//保存长的圆柱体
-const longSensors = [];
-//保存短的圆柱体
-const shortSensors = []
-//保存射线
-const lineSensors = []
-//保存断面线
-const crossSensors = []
-//记录渗压计管的数量
-let totalCount = 0
+const scene = new THREE.Scene();// 创建场景
+const group = new THREE.Group();// 创建一个组将3D物体放入其中
+const shortSensors = [];//保存短的圆柱体
 
 /**
  * @description: 初始化三维场景
  * @return {*}
  */
 export function initScene() {
-    // 创建场景
-    const scene = new THREE.Scene();
     // 创建一个纹理图片加载器加载图片
     var textureLoader = new THREE.TextureLoader();
     // 加载背景图片
@@ -45,62 +31,16 @@ export function initScene() {
     // 纹理对象Texture赋值给场景对象的背景属性.background
     scene.background = texture
 
-    //  添加坐标轴辅助器。参数：坐标轴长，红色代表 X 轴. 绿色代表 Y 轴. 蓝色代表 Z 轴.
+    //添加坐标轴辅助器。参数：坐标轴长，红色代表 X 轴. 绿色代表 Y 轴. 蓝色代表 Z 轴.
     const axesHelper = new THREE.AxesHelper(500)
-
+    //将坐标辅助器添加进场景中
     scene.add(axesHelper)
 
-    // 创建相机
+    //创建相机
     const camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 0.1, 5000);
-    camera.position.x = -100;
-    camera.position.y = 150;
-    camera.position.z = 600;
-
-    //将绘制的物体添加进场景中
-    group.add(riverBed())
-    group.add(frontDam())
-    group.add(middleDam())
-    group.add(behindDam())
-    group.add(tranDam())
-    group.add(drawLadder())
-    group.add(createWater())
-    group.add(createWaterSurface())
-    group.add(crossLine())
-    group.add(createRail())
-    group.add(createCorridors())
-
-    // 调用函数以加载和添加树木模型
-    loadAndAddTreeModels('/tree1.gltf', getTreePosition1(), new THREE.Vector3(1, 1, 1), group);
-    loadAndAddTreeModels('/tree2.gltf', getTreePosition2(), new THREE.Vector3(2, 2, 2), group);
-    loadAndAddTreeModels('/tree1.gltf', getTreePosition3(), new THREE.Vector3(0.5, 0.5, 0.5), group);
-
-    //读取后端接口的内容，进行绘制渗压计的个数与样式
-    createPressureSensors('42011640018').then(sensors => {
-        const { longSensors, shortSensors, lineSensors } = sensors;
-
-        //遍历长的圆柱体
-        longSensors.forEach(mesh => {
-            group.add(mesh);
-        });
-        //遍历短的圆柱体
-        shortSensors.forEach(mesh => {
-            group.add(mesh);
-        });
-        //遍历射线
-        lineSensors.forEach(mesh => {
-            group.add(mesh)
-        })
-        //遍历断面线
-        crossSensors.forEach((mesh) => {
-            group.add(mesh)
-        })
-    })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-
-    // 将组添加到场景中
-    scene.add(group);
+    camera.position.x = 80;
+    camera.position.y = 100;
+    camera.position.z = 200;
 
     // 创建渲染器
     const renderer = new THREE.WebGLRenderer();
@@ -117,152 +57,6 @@ export function initScene() {
     animate();
 
     return { renderer, camera }
-}
-
-/**
- * @description: 创建函数来加载树木模型并将其添加到指定组中
- * @param {*} modelPath
- * @param {*} positions
- * @param {*} scale
- * @param {*} group
- * @return {*}
- */
-function loadAndAddTreeModels(modelPath, positions, scale, group) {
-    positions.forEach(position => {
-        loadGLTFModel(modelPath, position, scale)
-            .then((scene) => {
-                group.add(scene); // 将加载的scene添加到指定的group中
-            })
-            .catch((error) => {
-                console.error('Error loading GLTF model:', error); // 加载失败的处理
-            });
-    });
-}
-
-/**
- * @description: 创建渗压计三维体
- * @param {*} params
- * @return {*}
- */
-function createPressureSensors(params) {
-    return getSYParams(params).then(res => {
-        const data = res.resultList
-        //将渗压计管数量记录
-        totalCount = res.totalCount
-
-        // 按照 ch 字段分组渗压计数据
-        const groupedByCh = data.reduce((acc, sensor) => {
-            const { mpcd, dvcd, ch } = sensor;
-            if (!acc[ch]) {
-                acc[ch] = [];
-            }
-            acc[ch].push({ mpcd, dvcd, ch }); // 只保留 mpcd、dvcd、ch 字段
-            return acc;
-        }, {});
-
-        //根据横断面的数量确定各横断面的间距
-        const length = Math.floor(35 / Object.keys(groupedByCh).length - 1);
-
-        // 创建渗压计，定义基本参数
-        let x = 8
-        let yLong = 11
-        let yShort = 11.5
-        let labelY = 11.5
-        let z = 22
-
-        for (const ch in groupedByCh) {
-            const sensorsInSection = groupedByCh[ch];
-
-            // 根据 mpcd 对渗压计进行排序
-            sensorsInSection.sort((a, b) => a.mpcd - b.mpcd);
-
-            /* 创建断面线 */
-            //创建断面线路径
-            const path = new THREE.CatmullRomCurve3([
-                new THREE.Vector3(2, 35, z),
-                new THREE.Vector3(8, 19, z),
-                new THREE.Vector3(14, 18.5, z),
-                new THREE.Vector3(20, 18, z),
-                new THREE.Vector3(23, 10, z),
-                new THREE.Vector3(20, 18, z),
-                new THREE.Vector3(14, 18.5, z),
-                new THREE.Vector3(8, 19, z),
-                new THREE.Vector3(2, 35, z),
-            ]);
-            //定义材质与生成断面线
-            const crossGeometry = new THREE.TubeGeometry(path, 64, 0.02, 8, true); // 修改这里的 0.02 可以改变线的宽度
-            const crossMaterial = new THREE.MeshBasicMaterial({ color: 0x27B7EE }); // 和水深一个颜色
-            const crossCylinder = new THREE.Mesh(crossGeometry, crossMaterial);
-            //将创建的断面线进行保存
-            crossSensors.push(crossCylinder)
-
-            sensorsInSection.forEach((sensor) => {
-                /* 创建外部空心圆柱体 */
-                const longGeometry = new THREE.CylinderGeometry(0.15, 0.15, 20, 32);
-                const longMaterial = new THREE.MeshBasicMaterial({ color: 0xEBF3FB, transparent: true, opacity: 0.4, depthWrite: false });
-                const longCylinder = new THREE.Mesh(longGeometry, longMaterial);
-                //改变空心圆柱体的位置
-                longCylinder.position.x = x;
-                longCylinder.position.y = yLong;
-                longCylinder.position.z = z;
-
-                /* 创建内部实体圆柱体 */
-                const shortGeometry = new THREE.CylinderGeometry(0.08, 0.08, 0.5, 32);
-                // 创建材质
-                const shortMaterial = new THREE.MeshBasicMaterial({ color: 0x27B7EE });
-                // 创建圆柱体网格
-                const shortCylinder = new THREE.Mesh(shortGeometry, shortMaterial);
-                //改变实心圆柱体的位置
-                shortCylinder.position.x = x;
-                shortCylinder.position.y = yShort;
-                shortCylinder.position.z = z;
-
-                //将测站编码与相应的实体圆柱进行绑定
-                const dvcd = sensor.dvcd;
-                if (!shortEntityArray[dvcd]) {
-                    shortEntityArray[dvcd] = []; // 如果尚未存在，则创建一个数组
-                }
-                // 将实体圆柱体保存到对应的dvcd的数组中
-                shortEntityArray[dvcd].push(shortCylinder);
-
-                /* 创建内部绿色射线 */
-                const path = new THREE.CatmullRomCurve3([
-                    new THREE.Vector3(x, yShort, z),
-                    new THREE.Vector3(x, yShort + 9, z)
-                ]);
-
-                const lineGeometry = new THREE.TubeGeometry(path, 64, 0.02, 8, true); // 修改这里的 0.02 可以改变线的宽度
-                const lineMaterial = new THREE.MeshBasicMaterial({ color: 0x00FF00 }); // 绿色
-                const lineCylinder = new THREE.Mesh(lineGeometry, lineMaterial);
-
-                /* 创建文字标识 */
-                const textLabel = createText(group, x, labelY, z )
-
-                //将测站编码与相应的标签样式进行绑定
-                if (!textLabelArray[dvcd]) {
-                    textLabelArray[dvcd] = [];
-                }
-                // 将 textLabel 保存到对应的 dvcd 的数组中
-                textLabelArray[dvcd].push(textLabel);
-
-                longSensors.push(longCylinder);
-                shortSensors.push(shortCylinder);
-                lineSensors.push(lineCylinder)
-
-                x += 6
-            });
-            x = 8
-            yLong = 11
-            yShort = 11.5
-            labelY = 11.5
-            z += length
-        }
-
-        return { longSensors, shortSensors, lineSensors };
-    })
-        .catch(error => {
-            console.log(error);
-        });
 }
 
 /**
@@ -290,17 +84,13 @@ export function receivePressVal(params1, param2, param3) {
             return acc;
         }, {});
 
-        console.log(pressData);
-        console.log(textLabelArray)
-        console.log(shortEntityArray)
-
         //定义一个对象用于保存以日期作为key，其中包括各渗压计的数值以及标注样式
         const dataPressArr = {}
         //标注文字对象与上述处理的对象通过渗压计编号进行连接，按照每个时间最为key，其中包含每个渗压计的标注样式以及渗压计数值
         for (const key in pressData) {
             const updArr = pressData[key];
-            const textLabelArr = textLabelArray[key][0];
-            const shortEntityArr = shortEntityArray[key][0]
+            const textLabelArr = store.state.textLabelArray[key][0];
+            const shortEntityArr = store.state.shortEntityArray[key][0]
 
             updArr.forEach(entry => {
                 const { dt, press_val } = entry;
@@ -315,10 +105,11 @@ export function receivePressVal(params1, param2, param3) {
         //将缺乏的日期进行删除
         for (let date in dataPressArr) {
             let keys = Object.keys(dataPressArr[date]);
-            if (keys.length !== totalCount) {
+            if (keys.length !== store.state.totalCount) {
                 delete dataPressArr[date];
             }
         }
+
         console.log(dataPressArr)
         // 调用异步函数
         updateTextLabels(dataPressArr);
@@ -345,9 +136,9 @@ async function updateTextLabels(dataPressArr) {
             const pressVal = values[upd][1];
 
             //将渗压计的数值进行更新
-            textLabel.updateTextLabel(pressVal)
+            textLabel.updateTextLabel(pressVal, store.state.totalCount)
 
-            let height = (pressVal / 10) - 0.25
+            let height = pressVal / 10
 
             /* 获取初始mesh的各参数 */
             const shortEntityHeight = values[upd][2].geometry.parameters.height;
@@ -367,13 +158,13 @@ async function updateTextLabels(dataPressArr) {
             shortEntity.push(cube)
         }
         /* 将创建新的水柱进行添加，再将之前已经创建的进行删除 */
-        if (shortEntity.length > 6) {
+        if (shortEntity.length > store.state.totalCount) {
             //旧水柱
-            const oldShortEntityArray = shortEntity.slice(0, 6);
+            const oldShortEntityArray = shortEntity.slice(0, store.state.totalCount);
             //新水柱
-            const newShortEntityArray = shortEntity.slice(6)
+            const newShortEntityArray = shortEntity.slice(store.state.totalCount)
 
-            shortEntity.splice(0, 6);
+            shortEntity.splice(0, store.state.totalCount);
 
             //遍历添加新的水柱
             newShortEntityArray.forEach((mesh) => {
@@ -400,8 +191,80 @@ async function updateTextLabels(dataPressArr) {
         await new Promise(resolve => setTimeout(resolve, 5000));
     }
 }
+/**
+ * @description: 接受水库编码，用于显示水库
+ * @return {*}
+ */
+bus.$on('resCode', value => {
+    if (value === '42128140006') {
+        console.log('金盆水库')
+        // 从场景中移除所有对象
+        scene.remove.apply(scene, scene.children);
 
-//接收时间，并且发送请求获取渗水计的数值
+        // 遍历场景中的所有对象，并清理内存
+        scene.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+                child.geometry.dispose();
+                child.material.dispose();
+            }
+        });
+
+        // 将场景的 children 设为空数组，清空场景
+        scene.children = [];
+    } else {
+        console.log('杨树堰水库')
+        //将绘制的物体添加进场景中
+        group.add(riverBed())
+        group.add(frontDam())
+        group.add(middleDam())
+        group.add(behindDam())
+        group.add(tranDam())
+        group.add(drawLadder())
+        group.add(createWater())
+        group.add(createWaterSurface())
+        group.add(crossLine())
+        group.add(createRail())
+        group.add(createCorridors())
+
+        // 调用函数以加载和添加树木模型
+        loadAndAddTreeModels('/tree1.gltf', getTreePosition1(), new THREE.Vector3(1, 1, 1), group);
+        loadAndAddTreeModels('/tree2.gltf', getTreePosition2(), new THREE.Vector3(2, 2, 2), group);
+        loadAndAddTreeModels('/tree1.gltf', getTreePosition3(), new THREE.Vector3(0.5, 0.5, 0.5), group);
+
+        //读取后端接口的内容，进行绘制渗压计的个数与样式
+        createPressureSensors(value, group).then(sensors => {
+            const { longSensors, shortSensors, lineSensors, crossSensors } = sensors;
+
+            //遍历长的圆柱体
+            longSensors.forEach(mesh => {
+                group.add(mesh);
+            });
+            //遍历短的圆柱体
+            shortSensors.forEach(mesh => {
+                group.add(mesh);
+            });
+            //遍历射线
+            lineSensors.forEach(mesh => {
+                group.add(mesh)
+            })
+            //遍历断面线
+            crossSensors.forEach((mesh) => {
+                group.add(mesh)
+            })
+        })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+        // 将组添加到场景中
+        scene.add(group);
+    }
+})
+
+/**
+ * @description: 接收时间，并且发送请求获取渗水计的数值
+ * @return {*}
+ */
 bus.$on('dateTime', value => {
     //对选择的日期进行处理
     const result = value.map(date => {
@@ -409,5 +272,5 @@ bus.$on('dateTime', value => {
         return d.toISOString().split('T')[0];
     });
     //获取各渗压计数值
-    receivePressVal('42011640018', result[0], result[1])
+    receivePressVal(store.state.resCode, result[0], result[1])
 })

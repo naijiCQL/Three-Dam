@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-28 14:13:54
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-28 14:16:10
+ * @LastEditTime: 2023-11-29 09:25:20
  * @FilePath: \three-project\src\components\positionData.js
  * @Description: 保存各gltf的位置数据
  */
@@ -11,8 +11,6 @@ import * as THREE from 'three';
 
 //定义树1gltf模型的位置
 const tree1Positions = [
-    new THREE.Vector3(30, 20, 15),
-    new THREE.Vector3(30, 20, 45),
     new THREE.Vector3(55, 16, 55),
     new THREE.Vector3(55, 16, 42),
     new THREE.Vector3(55, 16, 20),
