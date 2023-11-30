@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 15:48:43
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-29 14:08:55
+ * @LastEditTime: 2023-11-30 16:22:34
  * @FilePath: \three-project\src\components\HelloWorld.vue
  * @Description: 
 -->
@@ -32,10 +32,12 @@
 </template>
 
 <script>
-import { initScene } from "./initScene";
-// 导入轨道控制器
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import bus from '@/utils/bus'
+import store from '@/store/index'
+import { Message } from 'element-ui';
+import { initScene } from "./initScene";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";  // 导入轨道控制器
+
 export default {
   data() {
     return {
@@ -67,14 +69,23 @@ export default {
     },
     //通过日期进行查询
     select() {
-      console.log(this.formInline.value1)
-      bus.$emit('dateTime', this.formInline.value1);
+      if (!store.state.totalCount) {
+        Message.error('请等待渗压计模型添加！');
+      } else {
+        bus.$emit('dateTime', this.formInline.value1);
+      }
     },
-    //添加默认显示时间
+    //设置默认显示的时间
     getDateTime() {
-      let startDate = new Date("2023-08-16");
       let endDate = new Date();
-      return [startDate.getTime(), endDate.getTime()];
+      // 获取当前日期的时间戳
+      let currentTime = endDate.getTime();
+      // 计算七天前的时间戳（毫秒为单位）
+      let sevenDays = currentTime - 7 * 24 * 60 * 60 * 1000;
+      // 创建七天前的日期对象
+      let sevenDaysAgoDate = new Date(sevenDays);
+
+      return [sevenDaysAgoDate.getTime(), endDate.getTime()];
     },
     //选择水库，并将水库编码进行传输
     selectRes() {

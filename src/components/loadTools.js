@@ -2,19 +2,18 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-28 11:04:04
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-29 17:02:00
+ * @LastEditTime: 2023-11-30 16:13:11
  * @FilePath: \three-project\src\components\loadTools.js
  * @Description: 加载three.js模型的方法
  */
+import bus from '@/utils/bus'
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 
-//初始纹理加载器
-const textureLoader = new THREE.TextureLoader();
-//定义数组来保存各文字标签的mesh
-const textMeshArray = []
+const textureLoader = new THREE.TextureLoader();//初始纹理加载器
+let textMeshArray = []//定义数组来保存各文字标签的mesh
 /**
  * @description: 添加图片作为纹理
  * @param {*} path
@@ -91,34 +90,35 @@ export function loadAndAddTreeModels(modelPath, positions, scale, group) {
  * @return {*}
  */
 export function createText(group, x, y, z) {
+
     let textMesh = null;
 
     const loader = new FontLoader();
 
-    loader.load('/SimHei_Regular.json', function (font) {
+    // loader.load('/SimHei_Regular.json', function (font) {
 
-        const textGeometry = new TextGeometry(``, {
-            font: font,
-            size: 0.1,
-            height: 0,
-            curveSegments: 12,
-            bevelEnabled: false,
-            bevelThickness: 0,
-            bevelSize: 0,
-        });
+    //     const textGeometry = new TextGeometry(``, {
+    //         font: font,
+    //         size: 0.1,
+    //         height: 0,
+    //         curveSegments: 12,
+    //         bevelEnabled: false,
+    //         bevelThickness: 0,
+    //         bevelSize: 0,
+    //     });
 
-        // 创建文字材质
-        const textMaterial = new THREE.MeshBasicMaterial({ color: 'black' });
-        // 创建文字网格
-        textMesh = new THREE.Mesh(textGeometry, textMaterial);
+    //     // 创建文字材质
+    //     const textMaterial = new THREE.MeshBasicMaterial({ color: 'black' });
+    //     // 创建文字网格
+    //     textMesh = new THREE.Mesh(textGeometry, textMaterial);
 
-        // 设置文字的位置
-        textMesh.position.set(x, y, z);
-        // 将文本网格绕 Y 轴旋转 90 度
-        textMesh.rotateY(Math.PI / 2);
+    //     // 设置文字的位置
+    //     textMesh.position.set(x, y, z);
+    //     // 将文本网格绕 Y 轴旋转 90 度
+    //     textMesh.rotateY(Math.PI / 2);
 
-        group.add(textMesh)
-    });
+    //     group.add(textMesh)
+    // });
 
     // 实时更新标签内容和位置
     function updateTextLabel(newH, totalCount) {
@@ -130,19 +130,18 @@ export function createText(group, x, y, z) {
             if (newH) {
                 updatedText = `渗压计高度:${newH.toFixed(3)}m`;
             } else {
-                updatedText = `渗压计高度:${newH}m`;
+                updatedText = ``;
             }
 
             const textGeometry = new TextGeometry(updatedText, {
                 font: font,
-                size: 0.6,
+                size: 0.4,
                 height: 0,
                 curveSegments: 12,
                 bevelEnabled: false,
                 bevelThickness: 0,
                 bevelSize: 0,
             });
-
             // 创建文字材质
             const textMaterial = new THREE.MeshBasicMaterial({ color: 'black' });
             // 创建文字网格
@@ -153,11 +152,9 @@ export function createText(group, x, y, z) {
             textMesh.position.set(x, y, z);
             // 将文本网格绕 Y 轴旋转 90 度
             textMesh.rotateY(Math.PI / 2);
-
             //为了避免切换时会出现闪烁，先加载再进行删除
             if (textMeshArray.length > 0) {
                 group.add(textMeshArray[textMeshArray.length - 1])
-
                 // 当数组长度达到第7组时，删除前六组
                 if (textMeshArray.length === totalCount + 1) {
                     const newTextMeshArray = textMeshArray.slice(0, totalCount);
@@ -174,3 +171,13 @@ export function createText(group, x, y, z) {
 
     return { updateTextLabel };
 }
+
+/**
+ * @description: 接收时间，清空数组
+ * @return {*}
+ */
+bus.$on('dateTime', value => {
+    if (value) {
+        textMeshArray = []
+    }
+})

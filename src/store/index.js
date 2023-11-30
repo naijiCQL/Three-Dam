@@ -2,7 +2,7 @@
  * @Author: 杨道博
  * @Date: 2023-07-13 10:23:08
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-29 11:09:04
+ * @LastEditTime: 2023-11-30 16:08:15
  * @Description: 
  * @FilePath: \three-project\src\store\index.js
  */
@@ -18,6 +18,7 @@ export default new Vuex.Store({
     totalCount: null,//用于保存渗压管的数量
     textLabelArray: {}, //用于保存显示的文字对象
     shortEntityArray: {},//用于保存显示内部实体对象
+    textMeshArray: [],//用于保存各文字标签的mesh
   },
   getters: {
 
@@ -38,7 +39,7 @@ export default new Vuex.Store({
     //用于保存显示内部实体对象
     updateShortEntityArray(state, data) {
       state.shortEntityArray = data
-    }
+    },
   },
   actions: {
 

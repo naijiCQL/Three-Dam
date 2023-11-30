@@ -2,11 +2,10 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-28 14:13:54
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-29 09:25:20
+ * @LastEditTime: 2023-11-30 17:26:28
  * @FilePath: \three-project\src\components\positionData.js
  * @Description: 保存各gltf的位置数据
  */
-
 import * as THREE from 'three';
 
 //定义树1gltf模型的位置
@@ -39,6 +38,32 @@ const tree3Positions = [
     new THREE.Vector3(13, 28, 58),
 ];
 
+/**
+ * @description: 批量规则生成树模型位置
+ * @param {*} x
+ * @param {*} y
+ * @param {*} intervals
+ * @param {*} start
+ * @param {*} end
+ * @return {*}
+ */
+function getTreePositions(x, y, intervals, start, end) {
+    const result = []
+    //根据坐标的正负进行判断
+    if (start > end) {
+        for (let i = start; i >= end; i -= intervals) {
+            const element = new THREE.Vector3(x, y, i);
+            result.push(element)
+        }
+    } else {
+        for (let i = start; i <= end; i += intervals) {
+            const element = new THREE.Vector3(x, y, i);
+            result.push(element)
+        }
+    }
+    return result
+}
+
 export function getTreePosition1() {
     return tree1Positions
 }
@@ -49,5 +74,29 @@ export function getTreePosition2() {
 
 export function getTreePosition3() {
     return tree3Positions
+}
+
+//定义树1gltf模型的位置
+const tree4Positions = [];
+
+export function getTreePosition4() {
+
+    getTreePositions(7, 31, 5, -5, -55).forEach((e) => {
+        tree4Positions.push(e)
+    })
+
+    getTreePositions(13, 28, 5, -10, -50).forEach((e) => {
+        tree4Positions.push(e)
+    })
+
+    getTreePositions(18, 26, 5, -20, -40).forEach((e) => {
+        tree4Positions.push(e)
+    })
+
+    getTreePositions(25, 24, 5, -25, -35).forEach((e) => {
+        tree4Positions.push(e)
+    })
+
+    return tree4Positions
 }
 

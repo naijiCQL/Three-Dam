@@ -2,12 +2,13 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-29 14:12:15
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-29 16:56:37
+ * @LastEditTime: 2023-11-30 13:31:34
  * @FilePath: \three-project\src\components\createJpRes.js
  * @Description: 创建金盆水库三维基础模型
  */
 import * as THREE from 'three';
 import { loadTexture } from './loadTools'
+import { Water } from 'three/examples/jsm/objects/Water2.js';
 
 /**
  * @description: 定义几何体参数设置
@@ -87,14 +88,19 @@ export function jpFrontDam() {
 
 /**
  * @description: 创建坝体（中）
+ * @param {*} depth z轴延伸的长度
+ * @param {*} picture 纹理图片的位置
+ * @param {*} z 往z轴平移的长度
+ * @param {*} rotation 绕y轴旋转的角度
+ * @param {*} x 往x轴平移的长度
  * @return {*}
  */
-export function jpMiddleDam(depth, picture, z, rotation) {
+export function jpMiddleDam(depth, picture, z, rotation,x) {
     const shape = new THREE.Shape();
 
     shape.moveTo(-2, 35);
-    shape.lineTo(-7, 11);
-    shape.lineTo(-7, 10);
+    shape.lineTo(x, 11);
+    shape.lineTo(x, 10);
     shape.lineTo(7, 10);
     shape.lineTo(7, 11);
     shape.lineTo(2, 35);
@@ -107,7 +113,6 @@ export function jpMiddleDam(depth, picture, z, rotation) {
     });
 
     const middleDam = new THREE.Mesh(extrudeGeometry, material);
-
     // 将 middleDam 对象绕 Y 轴进行旋转
     middleDam.rotation.y = THREE.MathUtils.degToRad(rotation);
 
@@ -118,6 +123,11 @@ export function jpMiddleDam(depth, picture, z, rotation) {
 
 /**
  * @description: 创建坝体（后透明）
+ * @param {*} depth 
+ * @param {*} isTrue 是否为透明效果
+ * @param {*} z
+ * @param {*} rotation
+ * @param {*} x
  * @return {*}
  */
 export function jpBehindDam(depth, isTrue, z, rotation, x) {
@@ -135,24 +145,27 @@ export function jpBehindDam(depth, isTrue, z, rotation, x) {
     const material = new THREE.MeshBasicMaterial({
         map: loadTexture('/floor.jpg', 0.1, 0.1),
         transparent: isTrue, // 开启透明
-        opacity: 0.4, // 设置透明度
+        opacity: 0.25, // 设置透明度
         depthWrite: false,
     });
 
     const behindDam = new THREE.Mesh(extrudeGeometry, material);
-
-    behindDam.position.z = z
     // 将 middleDam 对象绕 Y 轴进行旋转
     behindDam.rotation.y = THREE.MathUtils.degToRad(rotation);
     behindDam.position.x = x
+    behindDam.position.z = z
 
     return behindDam;
 }
+
 /**
  * @description: 创建围栏
+ * @param {*} depth
+ * @param {*} rotation
+ * @param {*} z
  * @return {*}
  */
-export function jpCreateRail(depth, rotation,z) {
+export function jpCreateRail(depth, rotation, z) {
     const shape = new THREE.Shape();
 
     shape.moveTo(-2, 35);
@@ -170,13 +183,15 @@ export function jpCreateRail(depth, rotation,z) {
     const leftRail = new THREE.Mesh(extrudeGeometry, material);
 
     leftRail.rotation.y = THREE.MathUtils.degToRad(rotation);
-    leftRail.position.z=z
+    leftRail.position.z = z
 
     return leftRail;
 }
 
 /**
  * @description: 创建过道
+ * @param {*} depth
+ * @param {*} rotation
  * @return {*}
  */
 export function jpCreateCorridors(depth, rotation) {
@@ -202,9 +217,11 @@ export function jpCreateCorridors(depth, rotation) {
 
 /**
  * @description: 绘制后坝体
+ * @param {*} rotation
+ * @param {*} x
  * @return {*}
  */
-export function jpDrawLadder() {
+export function jpDrawLadder(rotation, x) {
     const geometry = new THREE.BufferGeometry();
 
     const vertices = new Float32Array([
@@ -214,7 +231,6 @@ export function jpDrawLadder() {
         2, 35, 50,
 
     ]);
-
     // itemSize = 3 因为每个顶点都是一个三元组。
     geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 
@@ -240,13 +256,67 @@ export function jpDrawLadder() {
         vertexColors: THREE.VertexColors, //使用缓存中的颜色
         side: THREE.DoubleSide,
         transparent: true, // 开启透明
-        opacity: 0.7, // 设置透明度
+        opacity: 1, // 设置透明度
         depthWrite: false,
     });
 
     const surface = new THREE.Mesh(geometry, grassMaterial);
 
+    surface.rotation.y = THREE.MathUtils.degToRad(rotation);
+    surface.position.x = x
     surface.position.y = 0.3
 
     return surface;
+}
+
+/**
+ * @description: 创建水体
+ * @return {*}
+ */
+export function createJpWater() {
+    const shape = new THREE.Shape();
+    shape.moveTo(-99, 20);
+    shape.lineTo(-42, 20);
+    shape.lineTo(-22, 27.5);
+    shape.lineTo(-20, 27.5);
+    shape.lineTo(-4.5, 34);
+    shape.lineTo(-99, 34);
+    shape.moveTo(-99, 20);
+
+    const extrudeGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings(150));
+
+    const material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(74,198,237)"), transparent: true, opacity: 0.65 });
+
+    const jpWater = new THREE.Mesh(extrudeGeometry, material);
+
+    return jpWater;
+}
+
+/**
+ * @description: 创建动态水面
+ * @return {*}
+ */
+export function createJpWaterSurface() {
+    const geometry = new THREE.BoxGeometry(99, 25, 148);
+
+    //创建动态水面材质
+    const waterSurface = new Water(
+        geometry,
+        {
+            flowSpeed: 0.1,//定义流速
+            color: new THREE.Color("rgb(74,198,237)"),
+            normalMap0: new THREE.TextureLoader().load('/waternormals.jpg', function (texture) {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            }),
+            normalMap1: new THREE.TextureLoader().load('/waternormals.jpg', function (texture) {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            }),
+        }
+    );
+
+    waterSurface.position.x = -50
+    waterSurface.position.y = 20
+    waterSurface.position.z = 75
+
+    return waterSurface;
 }

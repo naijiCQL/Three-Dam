@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-28 13:53:40
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-29 11:27:11
+ * @LastEditTime: 2023-11-30 15:50:02
  * @FilePath: \three-project\src\components\createSyj.js
  * @Description: 为两个水库创建渗压计
  */
@@ -11,19 +11,6 @@ import store from '@/store/index'
 import { getSYParams } from "@/api/home"
 import { createText } from './loadTools'
 
-//保存显示的文字对象
-const textLabelArray = {}
-//保存显示内部实体对象
-const shortEntityArray = {}
-//保存长的圆柱体
-const longSensors = [];
-//保存短的圆柱体
-const shortSensors = []
-//保存射线
-const lineSensors = []
-//保存断面线
-const crossSensors = []
-
 /**
  * @description: 创建杨树堰水库的渗压计三维体
  * @param {*} params
@@ -31,11 +18,18 @@ const crossSensors = []
  * @return {*}
  */
 export function createPressureSensors(params, group) {
+
+    const textLabelArray = {};//保存显示的文字对象
+    const shortEntityArray = {};//保存显示内部实体对象
+    const longSensors = [];//保存长的圆柱体
+    const shortSensors = [];//保存短的圆柱
+    const lineSensors = [];//保存射线
+    const crossSensors = [];//保存断面线
+
     return getSYParams(params).then(res => {
         const data = res.resultList
         //将渗压计管数量进行保存
         store.commit('updataTotalCount', res.totalCount)
-
         // 按照 ch 字段分组渗压计数据
         const groupedByCh = data.reduce((acc, sensor) => {
             const { mpcd, dvcd, ch } = sensor;
@@ -45,10 +39,8 @@ export function createPressureSensors(params, group) {
             acc[ch].push({ mpcd, dvcd, ch }); // 只保留 mpcd、dvcd、ch 字段
             return acc;
         }, {});
-
         //根据横断面的数量确定各横断面的间距
-        const length = Math.floor(35 / Object.keys(groupedByCh).length - 1);
-
+        const length = Math.floor(30 / Object.keys(groupedByCh).length - 1);
         // 创建渗压计，定义基本参数
         let x = 8
         let yLong = 11
@@ -61,7 +53,6 @@ export function createPressureSensors(params, group) {
 
             // 根据 mpcd 对渗压计进行排序
             sensorsInSection.sort((a, b) => a.mpcd - b.mpcd);
-
             /* 创建断面线 */
             //创建断面线路径
             const path = new THREE.CatmullRomCurve3([
@@ -102,7 +93,6 @@ export function createPressureSensors(params, group) {
                 shortCylinder.position.x = x;
                 shortCylinder.position.y = yShort;
                 shortCylinder.position.z = z;
-
                 //将测站编码与相应的实体圆柱进行绑定
                 const dvcd = sensor.dvcd;
                 if (!shortEntityArray[dvcd]) {
@@ -110,7 +100,6 @@ export function createPressureSensors(params, group) {
                 }
                 // 将实体圆柱体保存到对应的dvcd的数组中
                 shortEntityArray[dvcd].push(shortCylinder);
-
                 /* 创建内部绿色射线 */
                 const path = new THREE.CatmullRomCurve3([
                     new THREE.Vector3(x, yShort, z),
@@ -123,7 +112,6 @@ export function createPressureSensors(params, group) {
 
                 /* 创建文字标识 */
                 const textLabel = createText(group, x, labelY, z)
-
                 //将测站编码与相应的标签样式进行绑定
                 if (!textLabelArray[dvcd]) {
                     textLabelArray[dvcd] = [];

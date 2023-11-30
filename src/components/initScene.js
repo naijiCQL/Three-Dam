@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-29 17:25:48
+ * @LastEditTime: 2023-11-30 17:21:43
  * @FilePath: \three-project\src\components\initScene.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
@@ -12,15 +12,16 @@ import store from '@/store/index'
 import { getPressVal } from "@/api/home"
 import { loadAndAddTreeModels } from './loadTools'
 import { createPressureSensors } from './createSyj'
-import { getTreePosition1, getTreePosition2, getTreePosition3 } from './positionData'
+import { getTreePosition1, getTreePosition3,getTreePosition4 } from './positionData'
+import { jpRiverBed, jpFrontDam, jpMiddleDam, jpBehindDam, jpDrawLadder, jpCreateRail, jpCreateCorridors, createJpWaterSurface } from './createJpRes'
 import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder, createWater, createWaterSurface, crossLine, createRail, createCorridors } from './createYsyRes'
-import { jpRiverBed, jpFrontDam, jpMiddleDam, jpBehindDam, jpDrawLadder, jpCreateRail, jpCreateCorridors } from './createJpRes'
 
 const scene = new THREE.Scene();// 创建场景
 const group = new THREE.Group();// 创建一个组将3D物体放入其中
 const shortSensors = [];//保存短的圆柱体
 const axesHelper = new THREE.AxesHelper(400)//添加坐标轴辅助器。参数：坐标轴长，红色代表 X 轴. 绿色代表 Y 轴. 蓝色代表 Z 轴.
-const camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 0.1, 5000); //创建相机
+const camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 1, 5000); //创建相机
+let isUpdateActive = true; // 标志变量，控制更新状态
 
 /**
  * @description: 初始化三维场景
@@ -104,10 +105,26 @@ export function receivePressVal(params1, param2, param3) {
             if (keys.length !== store.state.totalCount) {
                 delete dataPressArr[date];
             }
-        }
 
+            const values = dataPressArr[date];
+            let allNull = true;
+
+            //如果某一天中每一个管道的数值都为null，将其进行删除
+            for (const key in values) {
+                const pressVal = values[key][1];
+                // 检查pressVal是否为null
+                if (pressVal) {
+                    allNull = false;
+                    break; // 如果有一个pressVal不为null，则跳出循环
+                }
+            }
+            // 如果一整天内所有管道的press_val都为null，则删除该天的数据项
+            if (allNull) {
+                delete dataPressArr[date];
+            }
+        }
         console.log(dataPressArr)
-        // 调用异步函数
+        //调用异步函数
         updateTextLabels(dataPressArr);
     })
         .catch(error => {
@@ -130,7 +147,6 @@ async function updateTextLabels(dataPressArr) {
             const textLabel = values[upd][0];
             //各渗压计的数值
             const pressVal = values[upd][1];
-
             //将渗压计的数值进行更新
             textLabel.updateTextLabel(pressVal, store.state.totalCount)
 
@@ -161,17 +177,14 @@ async function updateTextLabels(dataPressArr) {
             const newShortEntityArray = shortEntity.slice(store.state.totalCount)
 
             shortEntity.splice(0, store.state.totalCount);
-
             //遍历添加新的水柱
             newShortEntityArray.forEach((mesh) => {
                 group.add(mesh);
             });
-
             //遍历删去旧的水柱
             oldShortEntityArray.forEach((mesh) => {
                 group.remove(mesh)
             })
-
             //将原来存在的水柱进行移除
             if (shortSensors.length) {
                 shortSensors.forEach((mesh) => {
@@ -183,8 +196,11 @@ async function updateTextLabels(dataPressArr) {
                 group.add(mesh)
             })
         }
+        if (!isUpdateActive) {
+            break; // 如果更新被停止，则跳出循环
+        }
         // 使用setTimeout延迟5秒钟
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
     }
 }
 
@@ -193,7 +209,7 @@ async function updateTextLabels(dataPressArr) {
  * @return {*}
  */
 function remove3DObject() {
-    // 释放 几何体 和 材质
+    // 释放几何体和材质
     const clearCache = (item) => {
         item.geometry.dispose();
         item.material.dispose();
@@ -223,83 +239,121 @@ function remove3DObject() {
  * @return {*}
  */
 bus.$on('resCode', value => {
+    //跳出循环
+    isUpdateActive = false;
     //从场景移除已经创建的物体
-    remove3DObject()
-    //根据所选择的水库进行展示模型
-    if (value === '42128140006') {
-        //设置相机视角
-        camera.position.x = -300;
-        camera.position.y = 800;
-        camera.position.z = 800;
-
-        group.add(jpRiverBed())
-        group.add(jpFrontDam())
-        group.add(jpMiddleDam(60, '/dam.png', 0, 0))
-        group.add(jpMiddleDam(100, '/dam.png', 0, 270))
-        group.add(jpMiddleDam(90, '/floor.jpg', 60, 0))
-        group.add(jpBehindDam(60, true, 0, 0, 0))
-        group.add(jpBehindDam(90, false, 60, 0, 0))
-        group.add(jpBehindDam(100, true, 0, 90, -100))
-        group.add(jpCreateRail(150, 0, 0))
-        group.add(jpCreateRail(100, 270, 3.7))
-        group.add(jpCreateCorridors(150, 0))
-        group.add(jpCreateCorridors(100, 270))
-        group.add(jpDrawLadder())
-
-        // 将组添加到场景中
-        scene.add(group);
-    } else {
-        //设置相机视角
-        camera.position.x = 80;
-        camera.position.y = 100;
-        camera.position.z = 200;
-
-        //将绘制的物体添加进场景中
-        group.add(riverBed())
-        group.add(frontDam())
-        group.add(middleDam())
-        group.add(behindDam())
-        group.add(tranDam())
-        group.add(drawLadder())
-        group.add(createWater())
-        group.add(createWaterSurface())
-        group.add(crossLine())
-        group.add(createRail())
-        group.add(createCorridors())
-
-        // 调用函数以加载和添加树木模型
+    setTimeout(() => {
+        //清空场景内物体
+        remove3DObject()
+        //调用函数以加载和添加树木模型
         loadAndAddTreeModels('/tree1.gltf', getTreePosition1(), new THREE.Vector3(1, 1, 1), group);
-        loadAndAddTreeModels('/tree2.gltf', getTreePosition2(), new THREE.Vector3(2, 2, 2), group);
         loadAndAddTreeModels('/tree1.gltf', getTreePosition3(), new THREE.Vector3(0.5, 0.5, 0.5), group);
 
-        //读取后端接口的内容，进行绘制渗压计的个数与样式
-        createPressureSensors(value, group).then(sensors => {
-            const { longSensors, shortSensors, lineSensors, crossSensors } = sensors;
+        //根据所选择的水库进行展示模型
+        if (value === '42128140006') {
+            isUpdateActive = true;
+            //设置相机视角
+            camera.position.x = 200;
+            camera.position.y = 200;
+            camera.position.z = 400;
 
-            //遍历长的圆柱体
-            longSensors.forEach(mesh => {
-                group.add(mesh);
-            });
-            //遍历短的圆柱体
-            shortSensors.forEach(mesh => {
-                group.add(mesh);
-            });
-            //遍历射线
-            lineSensors.forEach(mesh => {
-                group.add(mesh)
-            })
-            //遍历断面线
-            crossSensors.forEach((mesh) => {
-                group.add(mesh)
-            })
-        })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+            group.add(jpRiverBed())
+            group.add(jpFrontDam())
+            group.add(jpMiddleDam(60, '/dam.png', 0, 0, -7))
+            group.add(jpMiddleDam(62, '/dam.png', -62, 0, -35))
+            group.add(jpMiddleDam(100, '/dam.png', 0, 270, -7))
+            group.add(jpMiddleDam(90, '/floor.jpg', 60, 0, -7))
+            group.add(jpBehindDam(60, true, 0, 0, 0))
+            group.add(jpBehindDam(90, false, 60, 0, 0))
+            group.add(jpBehindDam(60, false, -62, 0, 0))
+            group.add(jpBehindDam(100, true, 0, 90, -100))
+            group.add(jpCreateRail(150, 0, 0))
+            group.add(jpCreateRail(100, 270, 3.7))
+            group.add(jpCreateCorridors(150, 0))
+            group.add(jpCreateCorridors(100, 270))
+            group.add(jpDrawLadder(0, 0))
+            group.add(jpDrawLadder(90, -90))
+            group.add(createJpWaterSurface())
 
-        // 将组添加到场景中
-        scene.add(group);
-    }
+            loadAndAddTreeModels('/tree1.gltf', getTreePosition4(), new THREE.Vector3(0.5, 0.5, 0.5), group);
+
+            //读取后端接口的内容，进行绘制渗压计的个数与样式
+            createPressureSensors(value, group).then(sensors => {
+                const { longSensors, shortSensors, lineSensors, crossSensors } = sensors;
+
+                //遍历长的圆柱体
+                longSensors.forEach(mesh => {
+                    group.add(mesh);
+                });
+                //遍历短的圆柱体
+                shortSensors.forEach(mesh => {
+                    group.add(mesh);
+                });
+                //遍历射线
+                lineSensors.forEach(mesh => {
+                    group.add(mesh)
+                })
+                //遍历断面线
+                crossSensors.forEach((mesh) => {
+                    group.add(mesh)
+                })
+            })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+            // 将组添加到场景中
+            scene.add(group);
+        } else {
+            isUpdateActive = true;
+            //设置相机视角
+            camera.position.x = 80;
+            camera.position.y = 100;
+            camera.position.z = 200;
+
+            //将绘制的物体添加进场景中
+            group.add(riverBed())
+            group.add(frontDam())
+            group.add(middleDam())
+            group.add(behindDam())
+            group.add(tranDam())
+            group.add(drawLadder())
+            group.add(createWater())
+            group.add(createWaterSurface())
+            group.add(crossLine())
+            group.add(createRail())
+            group.add(createCorridors())
+
+            //读取后端接口的内容，进行绘制渗压计的个数与样式
+            createPressureSensors(value, group).then(sensors => {
+                const { longSensors, shortSensors, lineSensors, crossSensors } = sensors;
+
+                //遍历长的圆柱体
+                longSensors.forEach(mesh => {
+                    group.add(mesh);
+                });
+                //遍历短的圆柱体
+                shortSensors.forEach(mesh => {
+                    group.add(mesh);
+                });
+                //遍历射线
+                lineSensors.forEach(mesh => {
+                    group.add(mesh)
+                })
+                //遍历断面线
+                crossSensors.forEach((mesh) => {
+                    group.add(mesh)
+                })
+            })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+            // 将组添加到场景中
+            scene.add(group);
+        }
+    }, 2000);
+
 })
 
 /**
