@@ -1,3 +1,11 @@
+<!--
+ * @Author: 陈巧龙
+ * @Date: 2023-11-10 15:48:54
+ * @LastEditors: 陈巧龙
+ * @LastEditTime: 2023-11-30 17:54:57
+ * @FilePath: \three-project\README.md
+ * @Description: 
+-->
 # Three-Dam
 
 ## 项目介绍
@@ -6,7 +14,7 @@
 
  2、三维物体(demo版本)构建代码位于**create3DObjects.js**中，数据渲染代码位于**index.js**中。
 
- 3、试点水库的构建代码位于**createYsyRes.js、createSyj.js、loadTool.js、positionData.js**中，数据渲染代码位于**initScene.js**中。
+ 3、试点水库的构建代码位于**createYsyRes.js、createSyj.js、loadTool.js、positionData.js、createJpRes.js**中，数据渲染代码位于**initScene.js**中。
 
  4、欢迎大家一起学习沟通！
 
