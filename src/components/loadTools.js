@@ -2,12 +2,13 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-28 11:04:04
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-01 11:34:51
+ * @LastEditTime: 2023-12-01 14:26:45
  * @FilePath: \three-project\src\components\loadTools.js
  * @Description: 加载three.js模型的方法
  */
 import bus from '@/utils/bus'
 import * as THREE from 'three';
+import store from '@/store/index'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 
@@ -137,8 +138,8 @@ export function createText(group, x, y, z, font) {
         } else {
             group.add(textMeshArray[0])
         }
+        store.commit('updateTextMeshArray', textMeshArray)
     }
-
     return { updateTextLabel };
 }
 

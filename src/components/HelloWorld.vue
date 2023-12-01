@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 15:48:43
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-01 11:40:13
+ * @LastEditTime: 2023-12-01 14:25:04
  * @FilePath: \three-project\src\components\HelloWorld.vue
  * @Description: 
 -->
@@ -70,7 +70,7 @@ export default {
     //通过日期进行查询
     select() {
       if (!store.state.totalCount) {
-        Message.error('请等待渗压计模型添加！');
+        Message.error('请等待水库3D模型与渗压计模型添加！');
       } else {
         bus.$emit('dateTime', this.formInline.value1);
       }
@@ -89,7 +89,7 @@ export default {
     },
     //选择水库，并将水库编码进行传输
     selectRes() {
-      this.$store.commit('updateResCode', this.value)
+      store.commit('updateResCode', this.value)
       bus.$emit('resCode', this.value);
     }
   }

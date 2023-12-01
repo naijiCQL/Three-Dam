@@ -2,7 +2,7 @@
  * @Author: 杨道博
  * @Date: 2023-07-13 10:23:08
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-30 16:08:15
+ * @LastEditTime: 2023-12-01 14:26:27
  * @Description: 
  * @FilePath: \three-project\src\store\index.js
  */
@@ -40,6 +40,10 @@ export default new Vuex.Store({
     updateShortEntityArray(state, data) {
       state.shortEntityArray = data
     },
+    //用于保存文字标签的mesh
+    updateTextMeshArray(state, data) {
+      state.textMeshArray = data
+    }
   },
   actions: {
 

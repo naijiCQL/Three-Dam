@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-01 13:48:30
+ * @LastEditTime: 2023-12-01 14:36:58
  * @FilePath: \three-project\src\components\initScene.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
@@ -204,7 +204,7 @@ async function updateTextLabels(dataPressArr) {
             break;
         }
         // 使用setTimeout延迟5秒钟
-        await new Promise(resolve => setTimeout(resolve, 7000));
+        await new Promise(resolve => setTimeout(resolve, 5000));
     }
     //将原来存在的水柱进行移除
     if (shortSensors.length) {
@@ -288,7 +288,7 @@ bus.$on('resCode', value => {
             loadAndAddTreeModels('/tree1.gltf', getTreePosition4(), new THREE.Vector3(0.5, 0.5, 0.5), group);
 
             //读取后端接口的内容，进行绘制渗压计的个数与样式
-            createPressureSensors(value, group,font).then(sensors => {
+            createPressureSensors(value, group, font).then(sensors => {
                 const { longSensors, shortSensors, lineSensors, crossSensors } = sensors;
 
                 //遍历长的圆柱体
@@ -335,7 +335,7 @@ bus.$on('resCode', value => {
             group.add(createCorridors())
 
             //读取后端接口的内容，进行绘制渗压计的个数与样式
-            createPressureSensors(value, group,font).then(sensors => {
+            createPressureSensors(value, group, font).then(sensors => {
                 const { longSensors, shortSensors, lineSensors, crossSensors } = sensors;
 
                 //遍历长的圆柱体
@@ -362,7 +362,7 @@ bus.$on('resCode', value => {
             // 将组添加到场景中
             scene.add(group);
         }
-    }, 3000);
+    }, 5000);
 
 })
 
@@ -376,6 +376,13 @@ bus.$on('dateTime', value => {
         let d = new Date(date);
         return d.toISOString().split('T')[0];
     });
+    console.log(store.state.textMeshArray)
+    //将存在文字标签进行删除
+    store.state.textMeshArray.forEach((mesh) => {
+        group.remove(mesh)
+        mesh.geometry.dispose();
+        mesh.material.dispose();
+    })
     //获取各渗压计数值
     receivePressVal(store.state.resCode, result[0], result[1])
 })
