@@ -83,9 +83,9 @@ export default {
       // 计算七天前的时间戳（毫秒为单位）
       let sevenDays = currentTime - 7 * 24 * 60 * 60 * 1000;
       // 创建七天前的日期对象
-      let sevenDaysAgoDate = new Date(sevenDays);
+      let startTime = new Date(sevenDays);
 
-      return [sevenDaysAgoDate.getTime(), endDate.getTime()];
+      return [startTime.getTime(), endDate.getTime()];
     },
     //选择水库，并将水库编码进行传输
     selectRes() {

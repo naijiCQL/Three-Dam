@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-01 14:36:58
+ * @LastEditTime: 2023-12-01 17:28:36
  * @FilePath: \three-project\src\components\initScene.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
@@ -17,6 +17,7 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { getTreePosition1, getTreePosition3, getTreePosition4 } from './positionData'
 import { jpRiverBed, jpFrontDam, jpMiddleDam, jpBehindDam, jpDrawLadder, jpCreateRail, jpCreateCorridors, createJpWaterSurface } from './createJpRes'
 import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder, createWater, createWaterSurface, crossLine, createRail, createCorridors } from './createYsyRes'
+import { initBall } from './createBall'
 
 const scene = new THREE.Scene();// 创建场景
 const group = new THREE.Group();// 创建一个组将3D物体放入其中
@@ -41,8 +42,6 @@ export function initScene() {
     camera.position.x = 300;
     camera.position.y = 300;
     camera.position.z = 300;
-    //将坐标辅助器添加进场景中
-    scene.add(axesHelper)
     // 创建渲染器
     const renderer = new THREE.WebGLRenderer();
 
@@ -53,6 +52,10 @@ export function initScene() {
     loader.load('/SimHei_Regular.json', function (loadFont) {
         font = loadFont;
     });
+
+    initBall(group)
+    // 将组添加到场景中
+    scene.add(group);
 
     // 创建性能监视器
     let stats = new Stats()
@@ -376,7 +379,6 @@ bus.$on('dateTime', value => {
         let d = new Date(date);
         return d.toISOString().split('T')[0];
     });
-    console.log(store.state.textMeshArray)
     //将存在文字标签进行删除
     store.state.textMeshArray.forEach((mesh) => {
         group.remove(mesh)
