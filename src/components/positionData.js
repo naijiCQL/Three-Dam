@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-28 14:13:54
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-30 17:26:28
+ * @LastEditTime: 2023-12-01 09:13:48
  * @FilePath: \three-project\src\components\positionData.js
  * @Description: 保存各gltf的位置数据
  */
@@ -79,6 +79,10 @@ export function getTreePosition3() {
 //定义树1gltf模型的位置
 const tree4Positions = [];
 
+/**
+ * @description: 导出金盆水库的gltf装饰模型
+ * @return {*}
+ */
 export function getTreePosition4() {
 
     getTreePositions(7, 31, 5, -5, -55).forEach((e) => {

@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-30 17:21:43
+ * @LastEditTime: 2023-12-01 13:48:30
  * @FilePath: \three-project\src\components\initScene.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
@@ -12,7 +12,9 @@ import store from '@/store/index'
 import { getPressVal } from "@/api/home"
 import { loadAndAddTreeModels } from './loadTools'
 import { createPressureSensors } from './createSyj'
-import { getTreePosition1, getTreePosition3,getTreePosition4 } from './positionData'
+import Stats from 'three/examples/jsm/libs/stats.module.js'
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { getTreePosition1, getTreePosition3, getTreePosition4 } from './positionData'
 import { jpRiverBed, jpFrontDam, jpMiddleDam, jpBehindDam, jpDrawLadder, jpCreateRail, jpCreateCorridors, createJpWaterSurface } from './createJpRes'
 import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder, createWater, createWaterSurface, crossLine, createRail, createCorridors } from './createYsyRes'
 
@@ -22,6 +24,7 @@ const shortSensors = [];//保存短的圆柱体
 const axesHelper = new THREE.AxesHelper(400)//添加坐标轴辅助器。参数：坐标轴长，红色代表 X 轴. 绿色代表 Y 轴. 蓝色代表 Z 轴.
 const camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 1, 5000); //创建相机
 let isUpdateActive = true; // 标志变量，控制更新状态
+let font = null; //保存加载的字体
 
 /**
  * @description: 初始化三维场景
@@ -44,8 +47,29 @@ export function initScene() {
     const renderer = new THREE.WebGLRenderer();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-    // 渲染函数
+
+    const loader = new FontLoader();
+    //记载支持中文的字体
+    loader.load('/SimHei_Regular.json', function (loadFont) {
+        font = loadFont;
+    });
+
+    // 创建性能监视器
+    let stats = new Stats()
+    // 设置监视器面板，传入面板id（0: fps, 1: ms, 2: mb）
+    stats.setMode(0)
+    // 设置监视器位置
+    stats.domElement.style.position = 'absolute'
+    stats.domElement.style.left = '0px'
+    stats.domElement.style.top = '0px'
+
+    // 将监视器添加到页面中
+    document.body.appendChild(stats.domElement)
+    //渲染函数
     function animate() {
+        // 更新帧数
+        stats.update()
+        //渲染页面
         renderer.render(scene, camera);
         // 渲染下一帧的时候就会调用animate函数
         requestAnimationFrame(animate);
@@ -169,38 +193,24 @@ async function updateTextLabels(dataPressArr) {
 
             shortEntity.push(cube)
         }
-        /* 将创建新的水柱进行添加，再将之前已经创建的进行删除 */
-        if (shortEntity.length > store.state.totalCount) {
-            //旧水柱
-            const oldShortEntityArray = shortEntity.slice(0, store.state.totalCount);
-            //新水柱
-            const newShortEntityArray = shortEntity.slice(store.state.totalCount)
-
-            shortEntity.splice(0, store.state.totalCount);
-            //遍历添加新的水柱
-            newShortEntityArray.forEach((mesh) => {
-                group.add(mesh);
-            });
-            //遍历删去旧的水柱
-            oldShortEntityArray.forEach((mesh) => {
-                group.remove(mesh)
-            })
-            //将原来存在的水柱进行移除
-            if (shortSensors.length) {
-                shortSensors.forEach((mesh) => {
-                    group.remove(mesh)
-                })
-            }
-        } else {
+        //将第一组值作为绘制绘制水柱的值
+        if (shortEntity.length === store.state.totalCount) {
             shortEntity.forEach((mesh) => {
                 group.add(mesh)
             })
         }
+        //如果更新被停止，则跳出循环
         if (!isUpdateActive) {
-            break; // 如果更新被停止，则跳出循环
+            break;
         }
         // 使用setTimeout延迟5秒钟
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 7000));
+    }
+    //将原来存在的水柱进行移除
+    if (shortSensors.length) {
+        shortSensors.forEach((mesh) => {
+            group.remove(mesh)
+        })
     }
 }
 
@@ -266,7 +276,7 @@ bus.$on('resCode', value => {
             group.add(jpBehindDam(60, true, 0, 0, 0))
             group.add(jpBehindDam(90, false, 60, 0, 0))
             group.add(jpBehindDam(60, false, -62, 0, 0))
-            group.add(jpBehindDam(100, true, 0, 90, -100))
+            group.add(jpBehindDam(100, false, 0, 90, -100))
             group.add(jpCreateRail(150, 0, 0))
             group.add(jpCreateRail(100, 270, 3.7))
             group.add(jpCreateCorridors(150, 0))
@@ -278,7 +288,7 @@ bus.$on('resCode', value => {
             loadAndAddTreeModels('/tree1.gltf', getTreePosition4(), new THREE.Vector3(0.5, 0.5, 0.5), group);
 
             //读取后端接口的内容，进行绘制渗压计的个数与样式
-            createPressureSensors(value, group).then(sensors => {
+            createPressureSensors(value, group,font).then(sensors => {
                 const { longSensors, shortSensors, lineSensors, crossSensors } = sensors;
 
                 //遍历长的圆柱体
@@ -325,7 +335,7 @@ bus.$on('resCode', value => {
             group.add(createCorridors())
 
             //读取后端接口的内容，进行绘制渗压计的个数与样式
-            createPressureSensors(value, group).then(sensors => {
+            createPressureSensors(value, group,font).then(sensors => {
                 const { longSensors, shortSensors, lineSensors, crossSensors } = sensors;
 
                 //遍历长的圆柱体
@@ -352,7 +362,7 @@ bus.$on('resCode', value => {
             // 将组添加到场景中
             scene.add(group);
         }
-    }, 2000);
+    }, 3000);
 
 })
 

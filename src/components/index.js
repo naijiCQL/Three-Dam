@@ -6,10 +6,10 @@
  * @FilePath: \three-project\src\components\index.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
-import * as THREE from 'three';
-import { createWall, createDam, createTranDam, createWater, createWaterSurface, createLeftWall, createRightWall, createText } from './create3DObjects'
-import { getSYParams, getPressVal } from "@/api/home"
 import bus from '@/utils/bus'
+import * as THREE from 'three';
+import { getSYParams, getPressVal } from "@/api/home"
+import { createWall, createDam, createTranDam, createWater, createWaterSurface, createLeftWall, createRightWall, createText } from './create3DObjects'
 
 // 创建一个组将立方体放入其中
 const group = new THREE.Group();

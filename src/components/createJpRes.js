@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-29 14:12:15
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-30 13:31:34
+ * @LastEditTime: 2023-12-01 11:07:51
  * @FilePath: \three-project\src\components\createJpRes.js
  * @Description: 创建金盆水库三维基础模型
  */
@@ -231,7 +231,7 @@ export function jpDrawLadder(rotation, x) {
         2, 35, 50,
 
     ]);
-    // itemSize = 3 因为每个顶点都是一个三元组。
+    // itemSize = 3因为每个顶点都是一个三元组。
     geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 
     const indexs = new Uint16Array([

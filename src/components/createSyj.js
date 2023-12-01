@@ -17,7 +17,7 @@ import { createText } from './loadTools'
  * @param {*} group
  * @return {*}
  */
-export function createPressureSensors(params, group) {
+export function createPressureSensors(params, group,font) {
 
     const textLabelArray = {};//保存显示的文字对象
     const shortEntityArray = {};//保存显示内部实体对象
@@ -111,7 +111,7 @@ export function createPressureSensors(params, group) {
                 const lineCylinder = new THREE.Mesh(lineGeometry, lineMaterial);
 
                 /* 创建文字标识 */
-                const textLabel = createText(group, x, labelY, z)
+                const textLabel = createText(group, x, labelY, z,font)
                 //将测站编码与相应的标签样式进行绑定
                 if (!textLabelArray[dvcd]) {
                     textLabelArray[dvcd] = [];

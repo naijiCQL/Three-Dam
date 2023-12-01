@@ -7,8 +7,8 @@
  * @Description: 创建杨树堰水库三维基础模型
  */
 import * as THREE from 'three';
-import { Water } from 'three/examples/jsm/objects/Water2.js';
 import { loadTexture } from './loadTools'
+import { Water } from 'three/examples/jsm/objects/Water2.js';
 
 //定义几何体参数设置
 const extrudeSettings = {

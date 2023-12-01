@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 15:48:43
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-30 16:22:34
+ * @LastEditTime: 2023-12-01 11:40:13
  * @FilePath: \three-project\src\components\HelloWorld.vue
  * @Description: 
 -->
@@ -52,7 +52,7 @@ export default {
         value: '42011640018',
         label: '杨树堰水库'
       }],
-      value: ''
+      value: '',
     };
   },
   mounted() {
