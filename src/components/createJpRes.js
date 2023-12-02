@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-29 14:12:15
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-01 11:07:51
+ * @LastEditTime: 2023-12-02 21:00:09
  * @FilePath: \three-project\src\components\createJpRes.js
  * @Description: 创建金盆水库三维基础模型
  */
@@ -145,7 +145,7 @@ export function jpBehindDam(depth, isTrue, z, rotation, x) {
     const material = new THREE.MeshBasicMaterial({
         map: loadTexture('/floor.jpg', 0.1, 0.1),
         transparent: isTrue, // 开启透明
-        opacity: 0.25, // 设置透明度
+        opacity: 0.5, // 设置透明度
         depthWrite: false,
     });
 

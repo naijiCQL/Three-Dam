@@ -36,7 +36,6 @@ import bus from '@/utils/bus'
 import store from '@/store/index'
 import { Message } from 'element-ui';
 import { initScene } from "./initScene";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";  // 导入轨道控制器
 
 export default {
   data() {
@@ -61,11 +60,8 @@ export default {
   methods: {
     //初始化three场景
     initThree() {
-      const { renderer, camera } = initScene()
-
+      const { renderer } = initScene()
       this.$refs.webgl.appendChild(renderer.domElement)
-      // 添加轨道控制器
-      new OrbitControls(camera, renderer.domElement);
     },
     //通过日期进行查询
     select() {

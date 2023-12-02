@@ -2,30 +2,33 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-01 17:28:36
+ * @LastEditTime: 2023-12-02 20:45:10
  * @FilePath: \three-project\src\components\initScene.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
 import bus from '@/utils/bus'
 import * as THREE from 'three';
 import store from '@/store/index'
+import { initBall } from './createBall'
 import { getPressVal } from "@/api/home"
 import { loadAndAddTreeModels } from './loadTools'
 import { createPressureSensors } from './createSyj'
 import Stats from 'three/examples/jsm/libs/stats.module.js'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";  // 导入轨道控制器
 import { getTreePosition1, getTreePosition3, getTreePosition4 } from './positionData'
 import { jpRiverBed, jpFrontDam, jpMiddleDam, jpBehindDam, jpDrawLadder, jpCreateRail, jpCreateCorridors, createJpWaterSurface } from './createJpRes'
 import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder, createWater, createWaterSurface, crossLine, createRail, createCorridors } from './createYsyRes'
-import { initBall } from './createBall'
 
+const renderer = new THREE.WebGLRenderer({ antialias: true }); // 创建渲染器
 const scene = new THREE.Scene();// 创建场景
 const group = new THREE.Group();// 创建一个组将3D物体放入其中
 const shortSensors = [];//保存短的圆柱体
 const axesHelper = new THREE.AxesHelper(400)//添加坐标轴辅助器。参数：坐标轴长，红色代表 X 轴. 绿色代表 Y 轴. 蓝色代表 Z 轴.
-const camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 1, 5000); //创建相机
+let camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 1, 5000); //创建相机
 let isUpdateActive = true; // 标志变量，控制更新状态
 let font = null; //保存加载的字体
+let rotationY = true;//开启自转
 
 /**
  * @description: 初始化三维场景
@@ -39,11 +42,9 @@ export function initScene() {
     // 纹理对象Texture赋值给场景对象的背景属性.background
     scene.background = texture
     // 设置相机视角参数
-    camera.position.x = 300;
-    camera.position.y = 300;
-    camera.position.z = 300;
-    // 创建渲染器
-    const renderer = new THREE.WebGLRenderer();
+    camera.position.set(300, 300, 300)
+    //添加轨道控制器
+    new OrbitControls(camera, renderer.domElement)
 
     renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -70,6 +71,8 @@ export function initScene() {
     document.body.appendChild(stats.domElement)
     //渲染函数
     function animate() {
+        // 地球旋转
+        if (rotationY) { ballRotationY() }
         // 更新帧数
         stats.update()
         //渲染页面
@@ -80,7 +83,14 @@ export function initScene() {
     //进行渲染
     animate();
 
-    return { renderer, camera }
+    return { renderer }
+}
+/**
+ * @description: 地球自动旋转
+ * @return {*}
+ */
+function ballRotationY() {
+    scene.rotation.y += 0.003
 }
 
 /**
@@ -256,6 +266,10 @@ bus.$on('resCode', value => {
     isUpdateActive = false;
     //从场景移除已经创建的物体
     setTimeout(() => {
+        //停止自转
+        rotationY = false
+        //复原位置
+        scene.rotation.y = 0
         //清空场景内物体
         remove3DObject()
         //调用函数以加载和添加树木模型
@@ -266,9 +280,7 @@ bus.$on('resCode', value => {
         if (value === '42128140006') {
             isUpdateActive = true;
             //设置相机视角
-            camera.position.x = 200;
-            camera.position.y = 200;
-            camera.position.z = 400;
+            camera.position.set(200, 200, 400)
 
             group.add(jpRiverBed())
             group.add(jpFrontDam())
@@ -320,9 +332,7 @@ bus.$on('resCode', value => {
         } else {
             isUpdateActive = true;
             //设置相机视角
-            camera.position.x = 80;
-            camera.position.y = 100;
-            camera.position.z = 200;
+            camera.position.set(80, 100, 200)
 
             //将绘制的物体添加进场景中
             group.add(riverBed())

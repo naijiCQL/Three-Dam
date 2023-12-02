@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-12 13:51:16
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-29 09:25:50
+ * @LastEditTime: 2023-12-02 20:59:41
  * @FilePath: \three-project\src\components\createYsyRes.js
  * @Description: 创建杨树堰水库三维基础模型
  */
@@ -121,7 +121,7 @@ export function behindDam() {
     const material = new THREE.MeshBasicMaterial({
         map: loadTexture('/floor.jpg', 0.1, 0.1),
         transparent: true, // 开启透明
-        opacity: 0.4, // 设置透明度
+        opacity: 0.5, // 设置透明度
         depthWrite: false,
     });
 
