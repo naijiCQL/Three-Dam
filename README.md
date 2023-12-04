@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 15:48:54
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-30 17:54:57
+ * @LastEditTime: 2023-12-04 19:56:15
  * @FilePath: \three-project\README.md
  * @Description: 
 -->
@@ -16,7 +16,7 @@
 
  3、试点水库的构建代码位于**createYsyRes.js、createSyj.js、loadTool.js、positionData.js、createJpRes.js**中，数据渲染代码位于**initScene.js**中。
 
- 4、目前该项目已大致完成，欢迎大家一起学习沟通！
+ 4、目前该项目已建模完毕，欢迎大家一起学习沟通！
 
 ## 项目启动
 

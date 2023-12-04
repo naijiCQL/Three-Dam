@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-29 14:12:15
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-02 21:00:09
+ * @LastEditTime: 2023-12-04 17:57:21
  * @FilePath: \three-project\src\components\createJpRes.js
  * @Description: 创建金盆水库三维基础模型
  */
@@ -95,7 +95,7 @@ export function jpFrontDam() {
  * @param {*} x 往x轴平移的长度
  * @return {*}
  */
-export function jpMiddleDam(depth, picture, z, rotation,x) {
+export function jpMiddleDam(depth, picture, z, rotation, x) {
     const shape = new THREE.Shape();
 
     shape.moveTo(-2, 35);
@@ -297,13 +297,21 @@ export function createJpWater() {
  * @return {*}
  */
 export function createJpWaterSurface() {
-    const geometry = new THREE.BoxGeometry(99, 25, 148);
+    //const geometry = new THREE.BoxGeometry(99, 25, 148);
+
+    const shape = new THREE.Shape();
+    shape.moveTo(-99, 34.3);
+    shape.lineTo(-4.5, 34.3);
+    shape.moveTo(-99, 34.3);
+
+    const extrudeGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings(150));
 
     //创建动态水面材质
     const waterSurface = new Water(
-        geometry,
+        extrudeGeometry,
         {
-            flowSpeed: 0.1,//定义流速
+            flowSpeed: 0.3,//定义流速
+            scale:0.1,
             color: new THREE.Color("rgb(74,198,237)"),
             normalMap0: new THREE.TextureLoader().load('/waternormals.jpg', function (texture) {
                 texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -313,10 +321,6 @@ export function createJpWaterSurface() {
             }),
         }
     );
-
-    waterSurface.position.x = -50
-    waterSurface.position.y = 20
-    waterSurface.position.z = 75
 
     return waterSurface;
 }

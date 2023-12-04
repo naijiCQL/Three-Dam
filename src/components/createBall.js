@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-12-01 17:21:52
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-01 17:30:13
+ * @LastEditTime: 2023-12-02 21:09:58
  * @FilePath: \three-project\src\components\createBall.js
  * @Description: 添加地球模型
  */
@@ -15,7 +15,7 @@ import * as THREE from 'three';
 export function initBall(group) {
     // 纹理贴图
     let textureLoader = new THREE.TextureLoader();
-
+    //加载纹理
     textureLoader.load('/map.jpg', function (texture) {
         // 创建球
         let geometry = new THREE.SphereGeometry(40, 100, 100);

@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-02 20:45:10
+ * @LastEditTime: 2023-12-04 19:55:47
  * @FilePath: \three-project\src\components\initScene.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
@@ -17,10 +17,10 @@ import Stats from 'three/examples/jsm/libs/stats.module.js'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";  // 导入轨道控制器
 import { getTreePosition1, getTreePosition3, getTreePosition4 } from './positionData'
-import { jpRiverBed, jpFrontDam, jpMiddleDam, jpBehindDam, jpDrawLadder, jpCreateRail, jpCreateCorridors, createJpWaterSurface } from './createJpRes'
+import { jpRiverBed, jpFrontDam, jpMiddleDam, jpBehindDam, jpDrawLadder, jpCreateRail, jpCreateCorridors, createJpWater,createJpWaterSurface } from './createJpRes'
 import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder, createWater, createWaterSurface, crossLine, createRail, createCorridors } from './createYsyRes'
 
-const renderer = new THREE.WebGLRenderer({ antialias: true }); // 创建渲染器
+const renderer = new THREE.WebGLRenderer(); // 创建渲染器
 const scene = new THREE.Scene();// 创建场景
 const group = new THREE.Group();// 创建一个组将3D物体放入其中
 const shortSensors = [];//保存短的圆柱体
@@ -57,7 +57,6 @@ export function initScene() {
     initBall(group)
     // 将组添加到场景中
     scene.add(group);
-
     // 创建性能监视器
     let stats = new Stats()
     // 设置监视器面板，传入面板id（0: fps, 1: ms, 2: mb）
@@ -298,6 +297,7 @@ bus.$on('resCode', value => {
             group.add(jpCreateCorridors(100, 270))
             group.add(jpDrawLadder(0, 0))
             group.add(jpDrawLadder(90, -90))
+            group.add(createJpWater())
             group.add(createJpWaterSurface())
 
             loadAndAddTreeModels('/tree1.gltf', getTreePosition4(), new THREE.Vector3(0.5, 0.5, 0.5), group);
@@ -375,7 +375,7 @@ bus.$on('resCode', value => {
             // 将组添加到场景中
             scene.add(group);
         }
-    }, 5000);
+    }, 1000);
 
 })
 
