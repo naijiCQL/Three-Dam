@@ -1,8 +1,8 @@
 /*
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
- * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-04 19:55:47
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2023-12-12 15:18:34
  * @FilePath: \three-project\src\components\initScene.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
@@ -17,8 +17,9 @@ import Stats from 'three/examples/jsm/libs/stats.module.js'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";  // 导入轨道控制器
 import { getTreePosition1, getTreePosition3, getTreePosition4 } from './positionData'
-import { jpRiverBed, jpFrontDam, jpMiddleDam, jpBehindDam, jpDrawLadder, jpCreateRail, jpCreateCorridors, createJpWater,createJpWaterSurface } from './createJpRes'
+import { jpRiverBed, jpFrontDam, jpMiddleDam, jpBehindDam, jpDrawLadder, jpCreateRail, jpCreateCorridors, createJpWater, createJpWaterSurface } from './createJpRes'
 import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder, createWater, createWaterSurface, crossLine, createRail, createCorridors } from './createYsyRes'
+import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 const renderer = new THREE.WebGLRenderer(); // 创建渲染器
 const scene = new THREE.Scene();// 创建场景
@@ -29,6 +30,7 @@ let camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHei
 let isUpdateActive = true; // 标志变量，控制更新状态
 let font = null; //保存加载的字体
 let rotationY = true;//开启自转
+const labelRenderer = new CSS2DRenderer();
 
 /**
  * @description: 初始化三维场景
@@ -43,8 +45,28 @@ export function initScene() {
     scene.background = texture
     // 设置相机视角参数
     camera.position.set(300, 300, 300)
+
+
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    // 相对鼠标的相对偏移
+    labelRenderer.domElement.style.top = '0px';
+    //设置.pointerEvents=none，以免模型标签HTML元素遮挡鼠标选择场景模型
+    labelRenderer.domElement.style.pointerEvents = "none";
+
+    document.body.appendChild(labelRenderer.domElement);
+
     //添加轨道控制器
-    new OrbitControls(camera, renderer.domElement)
+    let controls = new OrbitControls(camera, renderer.domElement)
+
+    //相机位置与观察目标点最小值
+    controls.minDistance = 100;
+    //相机位置与观察目标点最大值
+    controls.maxDistance = 700;
+
+    // 上下旋转范围
+    controls.minPolarAngle = Math.PI / 4;//默认值0
+    controls.maxPolarAngle = 2 * Math.PI / 5;//默认值Math.PI
 
     renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -75,6 +97,8 @@ export function initScene() {
         // 更新帧数
         stats.update()
         //渲染页面
+        labelRenderer.render(scene, camera);
+
         renderer.render(scene, camera);
         // 渲染下一帧的时候就会调用animate函数
         requestAnimationFrame(animate);
@@ -230,11 +254,15 @@ async function updateTextLabels(dataPressArr) {
  * @description: 清空场景内创建的物体
  * @return {*}
  */
-function remove3DObject() {
+export function remove3DObject() {
     // 释放几何体和材质
     const clearCache = (item) => {
-        item.geometry.dispose();
-        item.material.dispose();
+        if (item.geometry) {
+            item.geometry.dispose();
+        }
+        if (item.material) {
+            item.material.dispose();
+        }
     };
 
     // 递归释放物体下的 几何体 和 材质
@@ -244,11 +272,17 @@ function remove3DObject() {
             if (item.children.length) {
                 removeObj(item);
             } else {
-                clearCache(item);
-                item.clear();
+                if (item.geometry || item.material) {
+                    clearCache(item);
+                }
+                if (item.clear) {
+                    item.clear();
+                }
             }
         });
-        obj.clear();
+        if (obj.clear) {
+            obj.clear();
+        }
         arr = null;
     };
     // 移除 group
@@ -261,6 +295,7 @@ function remove3DObject() {
  * @return {*}
  */
 bus.$on('resCode', value => {
+    new OrbitControls(camera, labelRenderer.domElement)
     //跳出循环
     isUpdateActive = false;
     //从场景移除已经创建的物体
@@ -279,7 +314,7 @@ bus.$on('resCode', value => {
         if (value === '42128140006') {
             isUpdateActive = true;
             //设置相机视角
-            camera.position.set(200, 200, 400)
+            camera.position.set(280, 200, 350)
 
             group.add(jpRiverBed())
             group.add(jpFrontDam())

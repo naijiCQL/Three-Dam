@@ -1,14 +1,15 @@
 /*
  * @Author: 陈巧龙
  * @Date: 2023-11-12 13:51:16
- * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-02 20:59:41
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2023-12-12 16:43:42
  * @FilePath: \three-project\src\components\createYsyRes.js
  * @Description: 创建杨树堰水库三维基础模型
  */
 import * as THREE from 'three';
 import { loadTexture } from './loadTools'
 import { Water } from 'three/examples/jsm/objects/Water2.js';
+import { tag } from './createTags'
 
 //定义几何体参数设置
 const extrudeSettings = {
@@ -218,6 +219,10 @@ export function createWater() {
     resWater.position.z = 30
     resWater.position.x = -30
     resWater.rotation.y = THREE.MathUtils.degToRad(55);
+
+    resWater.add(tag('当前水位:78.5m', '/当前水位.png', 5, 10, 10))
+
+    resWater.add(tag('堰顶高程:60.5m', '/当前水位.png', 40, 15, 10))
 
     return resWater;
 }

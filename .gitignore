@@ -3,6 +3,9 @@ node_modules
 /dist
 vue.config.js
 three.mxd
+/public
+/src/assets
+/modeling data
 
 
 # local env files

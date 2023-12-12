@@ -1,8 +1,8 @@
 <!--
  * @Author: 陈巧龙
  * @Date: 2023-11-10 15:48:43
- * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-01 14:25:04
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2023-12-12 14:26:59
  * @FilePath: \three-project\src\components\HelloWorld.vue
  * @Description: 
 -->
@@ -61,6 +61,7 @@ export default {
     //初始化three场景
     initThree() {
       const { renderer } = initScene()
+
       this.$refs.webgl.appendChild(renderer.domElement)
     },
     //通过日期进行查询

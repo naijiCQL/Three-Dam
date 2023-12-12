@@ -1,14 +1,15 @@
 /*
  * @Author: 陈巧龙
  * @Date: 2023-11-29 14:12:15
- * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-04 17:57:21
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2023-12-12 16:25:54
  * @FilePath: \three-project\src\components\createJpRes.js
  * @Description: 创建金盆水库三维基础模型
  */
 import * as THREE from 'three';
 import { loadTexture } from './loadTools'
 import { Water } from 'three/examples/jsm/objects/Water2.js';
+import { tag } from './createTags'
 
 /**
  * @description: 定义几何体参数设置
@@ -289,6 +290,10 @@ export function createJpWater() {
 
     const jpWater = new THREE.Mesh(extrudeGeometry, material);
 
+    jpWater.add(tag('当前水位:78.5m', '/当前水位.png', -30, 35, 50))
+
+    jpWater.add(tag('堰顶高程:60.5m', '/当前水位.png', 0, 35, 25))
+
     return jpWater;
 }
 
@@ -297,7 +302,6 @@ export function createJpWater() {
  * @return {*}
  */
 export function createJpWaterSurface() {
-    //const geometry = new THREE.BoxGeometry(99, 25, 148);
 
     const shape = new THREE.Shape();
     shape.moveTo(-99, 34.3);
@@ -311,7 +315,7 @@ export function createJpWaterSurface() {
         extrudeGeometry,
         {
             flowSpeed: 0.3,//定义流速
-            scale:0.1,
+            scale: 0.1,
             color: new THREE.Color("rgb(74,198,237)"),
             normalMap0: new THREE.TextureLoader().load('/waternormals.jpg', function (texture) {
                 texture.wrapS = texture.wrapT = THREE.RepeatWrapping;

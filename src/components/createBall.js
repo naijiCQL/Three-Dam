@@ -1,8 +1,8 @@
 /*
  * @Author: 陈巧龙
  * @Date: 2023-12-01 17:21:52
- * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-02 21:09:58
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2023-12-12 17:01:10
  * @FilePath: \three-project\src\components\createBall.js
  * @Description: 添加地球模型
  */
@@ -24,7 +24,7 @@ export function initBall(group) {
             map: texture,
         });
         //网格模型对象Mesh
-       let mesh = new THREE.Mesh(geometry, material);
+        let mesh = new THREE.Mesh(geometry, material);
         // 唯一标识
         mesh.name = "ballMain";
         // 添加到场景中
