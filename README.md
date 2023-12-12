@@ -30,6 +30,8 @@
 
 ## 参考资料
 
-##### 1、[three.js](https://threejs.org/)
+##### 1、[Three.js](https://threejs.org/)
 
 ##### 2、[麒跃科技](https://www.three3d.cn/)
+
+##### 3、[Three.js中文网](http://www.webgl3d.cn/)
