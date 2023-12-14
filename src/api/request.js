@@ -1,8 +1,8 @@
 /*
  * @Author: 杨道博
  * @Date: 2022-08-01 17:15:39
- * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-14 15:46:25
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2023-12-14 15:57:17
  * @Description: axios配置
  * @FilePath: \three-project\src\api\request.js
  */
@@ -54,7 +54,7 @@ ajax.interceptors.response.use(response => {
     //如果请求出错，data.success应该为false
     if(!data.success){
         //抛出错误信息，同时将数据返回给接口
-        showErrMsg(msg)
+        //showErrMsg(msg)
         return data;
     }
 
@@ -63,7 +63,6 @@ ajax.interceptors.response.use(response => {
     return data;
   }, 
   error => {
-    console.log("错误信息",error)
     if(error.response.status == 401){ //如果状态码为401
         if(status401Bool){
             status401Bool = false;

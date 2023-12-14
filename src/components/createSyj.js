@@ -1,8 +1,8 @@
 /*
  * @Author: 陈巧龙
  * @Date: 2023-11-28 13:53:40
- * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-11-30 15:50:02
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2023-12-14 16:56:08
  * @FilePath: \three-project\src\components\createSyj.js
  * @Description: 为两个水库创建渗压计
  */
@@ -40,13 +40,13 @@ export function createPressureSensors(params, group,font) {
             return acc;
         }, {});
         //根据横断面的数量确定各横断面的间距
-        const length = Math.floor(30 / Object.keys(groupedByCh).length - 1);
+        const length = Math.floor(65 / Object.keys(groupedByCh).length - 1);
         // 创建渗压计，定义基本参数
         let x = 8
         let yLong = 11
         let yShort = 11.5
         let labelY = 11.5
-        let z = 22
+        let z = 10
 
         for (const ch in groupedByCh) {
             const sensorsInSection = groupedByCh[ch];
@@ -138,7 +138,4 @@ export function createPressureSensors(params, group,font) {
 
         return { longSensors, shortSensors, lineSensors, crossSensors };
     })
-        .catch(error => {
-            console.log(error);
-        });
 }

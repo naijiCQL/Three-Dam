@@ -146,7 +146,7 @@ export function jpBehindDam(depth, isTrue, z, rotation, x) {
     const material = new THREE.MeshBasicMaterial({
         map: loadTexture('/floor.jpg', 0.1, 0.1),
         transparent: isTrue, // 开启透明
-        opacity: 0.5, // 设置透明度
+        opacity: 0.1, // 设置透明度
         depthWrite: false,
     });
 
@@ -290,9 +290,9 @@ export function createJpWater() {
 
     const jpWater = new THREE.Mesh(extrudeGeometry, material);
 
-    jpWater.add(tag('当前水位:78.5m', '/当前水位.png', -30, 35, 50))
+    jpWater.add(tag('当前水位:70.5m', '/当前水位.png', -30, 35, 50))
 
-    jpWater.add(tag('堰顶高程:60.5m', '/当前水位.png', 0, 35, 25))
+    jpWater.add(tag('堰顶高程:75.5m', '/当前水位.png', 0, 35, 25))
 
     return jpWater;
 }

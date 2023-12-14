@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2023-12-12 15:18:34
+ * @LastEditTime: 2023-12-14 16:18:12
  * @FilePath: \three-project\src\components\initScene.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
@@ -18,7 +18,7 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";  // 导入轨道控制器
 import { getTreePosition1, getTreePosition3, getTreePosition4 } from './positionData'
 import { jpRiverBed, jpFrontDam, jpMiddleDam, jpBehindDam, jpDrawLadder, jpCreateRail, jpCreateCorridors, createJpWater, createJpWaterSurface } from './createJpRes'
-import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder, createWater, createWaterSurface, crossLine, createRail, createCorridors } from './createYsyRes'
+import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder,  crossLine, createRail, createCorridors } from './createYsyRes'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 const renderer = new THREE.WebGLRenderer(); // 创建渲染器
@@ -62,7 +62,7 @@ export function initScene() {
     //相机位置与观察目标点最小值
     controls.minDistance = 100;
     //相机位置与观察目标点最大值
-    controls.maxDistance = 700;
+    controls.maxDistance = 1000;
 
     // 上下旋转范围
     controls.minPolarAngle = Math.PI / 4;//默认值0
@@ -187,9 +187,6 @@ export function receivePressVal(params1, param2, param3) {
         //调用异步函数
         updateTextLabels(dataPressArr);
     })
-        .catch(error => {
-            console.log(error);
-        });
 }
 
 /**
@@ -314,7 +311,7 @@ bus.$on('resCode', value => {
         if (value === '42128140006') {
             isUpdateActive = true;
             //设置相机视角
-            camera.position.set(280, 200, 350)
+            camera.position.set(400, 400, 350)
 
             group.add(jpRiverBed())
             group.add(jpFrontDam())
@@ -367,7 +364,7 @@ bus.$on('resCode', value => {
         } else {
             isUpdateActive = true;
             //设置相机视角
-            camera.position.set(80, 100, 200)
+            camera.position.set(150, 200, 200)
 
             //将绘制的物体添加进场景中
             group.add(riverBed())
@@ -376,8 +373,8 @@ bus.$on('resCode', value => {
             group.add(behindDam())
             group.add(tranDam())
             group.add(drawLadder())
-            group.add(createWater())
-            group.add(createWaterSurface())
+            // group.add(createWater())
+            // group.add(createWaterSurface())
             group.add(crossLine())
             group.add(createRail())
             group.add(createCorridors())

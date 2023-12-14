@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-12 13:51:16
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2023-12-12 16:43:42
+ * @LastEditTime: 2023-12-14 17:53:15
  * @FilePath: \three-project\src\components\createYsyRes.js
  * @Description: 创建杨树堰水库三维基础模型
  */
@@ -122,7 +122,7 @@ export function behindDam() {
     const material = new THREE.MeshBasicMaterial({
         map: loadTexture('/floor.jpg', 0.1, 0.1),
         transparent: true, // 开启透明
-        opacity: 0.5, // 设置透明度
+        opacity: 0.1, // 设置透明度
         depthWrite: false,
     });
 
@@ -186,7 +186,7 @@ export function tranDam() {
 
     shape.moveTo(-63.02, 20);
     shape.lineTo(-63.02, 33.5);
-    shape.lineTo(-2, 33.5);
+    shape.lineTo(-6, 33.5);
     shape.lineTo(-20, 27.5);
     shape.lineTo(-22, 27.5);
     shape.lineTo(-42, 20);
@@ -194,14 +194,25 @@ export function tranDam() {
 
     const extrudeGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 
-    //大坝透明材质
-    const tranMaterial = new THREE.MeshBasicMaterial({
-        map: loadTexture('/floor.jpg', 0.1, 0.1),
-        transparent: true, // 开启透明
-        opacity: 0.75, // 设置透明度
-    });
+    //创建动态水面材质
+    const behindDam = new Water(
+        extrudeGeometry,
+        {
+            flowSpeed: 0.3,//定义流速
+            scale: 0.1,
+            color: new THREE.Color("rgb(74,198,237)"),
+            normalMap0: new THREE.TextureLoader().load('/waternormals.jpg', function (texture) {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            }),
+            normalMap1: new THREE.TextureLoader().load('/waternormals.jpg', function (texture) {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            }),
+        }
+    );
 
-    const behindDam = new THREE.Mesh(extrudeGeometry, tranMaterial);
+    behindDam.add(tag('当前水位:79.5m', '/当前水位.png', -35.5, 34, 20))
+
+    behindDam.add(tag('堰顶高程:81.5m', '/当前水位.png', 2, 34, 10))
 
     return behindDam;
 }
