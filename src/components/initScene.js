@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-10 16:27:36
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2023-12-14 16:18:12
+ * @LastEditTime: 2023-12-18 10:08:08
  * @FilePath: \three-project\src\components\initScene.js
  * @Description: 初始化three的场景以及将三维物体进行添加
  */
@@ -18,7 +18,7 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";  // 导入轨道控制器
 import { getTreePosition1, getTreePosition3, getTreePosition4 } from './positionData'
 import { jpRiverBed, jpFrontDam, jpMiddleDam, jpBehindDam, jpDrawLadder, jpCreateRail, jpCreateCorridors, createJpWater, createJpWaterSurface } from './createJpRes'
-import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder,  crossLine, createRail, createCorridors } from './createYsyRes'
+import { riverBed, frontDam, middleDam, behindDam, tranDam, drawLadder, crossLine, createRail, createCorridors } from './createYsyRes'
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 const renderer = new THREE.WebGLRenderer(); // 创建渲染器
@@ -113,7 +113,7 @@ export function initScene() {
  * @return {*}
  */
 function ballRotationY() {
-    scene.rotation.y += 0.003
+    scene.rotation.y += 0
 }
 
 /**
@@ -237,13 +237,31 @@ async function updateTextLabels(dataPressArr) {
             break;
         }
         // 使用setTimeout延迟5秒钟
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
     }
     //将原来存在的水柱进行移除
     if (shortSensors.length) {
         shortSensors.forEach((mesh) => {
-            group.remove(mesh)
-        })
+            // 从组中移除物体
+            group.remove(mesh);
+
+            // 释放几何体的资源
+            if (mesh.geometry) {
+                mesh.geometry.dispose();
+            }
+
+            // 释放材质的资源
+            if (mesh.material) {
+                // 如果材质是数组，循环释放每个材质
+                if (Array.isArray(mesh.material)) {
+                    mesh.material.forEach(material => material.dispose());
+                } else {
+                    mesh.material.dispose();
+                }
+            }
+        });
+        // 从内存中移除对物体的引用
+        shortSensors.length = 0;
     }
 }
 
@@ -262,7 +280,7 @@ export function remove3DObject() {
         }
     };
 
-    // 递归释放物体下的 几何体 和 材质
+    // 递归释放物体下的几何体和材质
     const removeObj = (obj) => {
         let arr = obj.children.filter((x) => x);
         arr.forEach((item) => {
@@ -373,8 +391,6 @@ bus.$on('resCode', value => {
             group.add(behindDam())
             group.add(tranDam())
             group.add(drawLadder())
-            // group.add(createWater())
-            // group.add(createWaterSurface())
             group.add(crossLine())
             group.add(createRail())
             group.add(createCorridors())

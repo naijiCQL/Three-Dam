@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-28 13:53:40
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2023-12-14 16:56:08
+ * @LastEditTime: 2023-12-18 09:32:32
  * @FilePath: \three-project\src\components\createSyj.js
  * @Description: 为两个水库创建渗压计
  */
@@ -17,7 +17,7 @@ import { createText } from './loadTools'
  * @param {*} group
  * @return {*}
  */
-export function createPressureSensors(params, group,font) {
+export function createPressureSensors(params, group, font) {
 
     const textLabelArray = {};//保存显示的文字对象
     const shortEntityArray = {};//保存显示内部实体对象
@@ -40,7 +40,9 @@ export function createPressureSensors(params, group,font) {
             return acc;
         }, {});
         //根据横断面的数量确定各横断面的间距
-        const length = Math.floor(65 / Object.keys(groupedByCh).length - 1);
+        const length = -12.5 * Object.keys(groupedByCh).length + 63;
+        console.log(Object.keys(groupedByCh).length)
+        console.log(length)
         // 创建渗压计，定义基本参数
         let x = 8
         let yLong = 11
@@ -50,7 +52,6 @@ export function createPressureSensors(params, group,font) {
 
         for (const ch in groupedByCh) {
             const sensorsInSection = groupedByCh[ch];
-
             // 根据 mpcd 对渗压计进行排序
             sensorsInSection.sort((a, b) => a.mpcd - b.mpcd);
             /* 创建断面线 */
@@ -111,7 +112,7 @@ export function createPressureSensors(params, group,font) {
                 const lineCylinder = new THREE.Mesh(lineGeometry, lineMaterial);
 
                 /* 创建文字标识 */
-                const textLabel = createText(group, x, labelY, z,font)
+                const textLabel = createText(group, x, labelY, z, font)
                 //将测站编码与相应的标签样式进行绑定
                 if (!textLabelArray[dvcd]) {
                     textLabelArray[dvcd] = [];

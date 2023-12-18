@@ -2,7 +2,7 @@
  * @Author: 陈巧龙
  * @Date: 2023-11-28 11:04:04
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2023-12-14 18:11:00
+ * @LastEditTime: 2023-12-18 09:35:56
  * @FilePath: \three-project\src\components\loadTools.js
  * @Description: 加载three.js模型的方法
  */
@@ -105,7 +105,7 @@ export function createText(group, x, y, z, font) {
 
         const textGeometry = new TextGeometry(updatedText, {
             font: font,
-            size: 1,
+            size: 0.7,
             height: 0,
             curveSegments: 12,
             bevelEnabled: false,
@@ -113,7 +113,7 @@ export function createText(group, x, y, z, font) {
             bevelSize: 0,
         });
         // 创建文字材质
-        const textMaterial = new THREE.MeshBasicMaterial({ color: 'gray' });
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 'black' });
         // 创建文字网格
         textMesh = new THREE.Mesh(textGeometry, textMaterial);
         //将mesh进行保存
