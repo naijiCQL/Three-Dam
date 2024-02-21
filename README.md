@@ -1,8 +1,8 @@
 <!--
  * @Author: 陈巧龙
  * @Date: 2023-11-10 15:48:54
- * @LastEditors: 陈巧龙
- * @LastEditTime: 2023-12-04 19:56:15
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2024-02-21 15:14:55
  * @FilePath: \three-project\README.md
  * @Description: 
 -->
@@ -35,3 +35,6 @@
 ##### 2、[麒跃科技](https://www.three3d.cn/)
 
 ##### 3、[Three.js中文网](http://www.webgl3d.cn/)
+
+## 界面展示
+![alt 属性文本](./页面.png)
